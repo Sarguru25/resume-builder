@@ -74,48 +74,74 @@ export async function DELETE(req, { params }) {
 
 export async function PUT(req) {
   const session = await getServerSession(authOptions)
+
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const formData = await req.formData()
-  const resumeId = formData.get("resumeId")
-  const removeBackground = formData.get("removeBackground")
-  const resumeDataRaw = formData.get("resumeData")
-  const image = formData.get("image")
+  await connectDB()
 
-  let resumeData =
-    typeof resumeDataRaw === "string"
-      ? JSON.parse(resumeDataRaw)
-      : structuredClone(resumeDataRaw)
+  let resumeId
+  let resumeData
+  let removeBackground = false
+  let image = null
 
+  const contentType = req.headers.get("content-type")
+
+  /* ---------- HANDLE JSON ---------- */
+  if (contentType?.includes("application/json")) {
+    const body = await req.json()
+    resumeId = body.resumeId
+    resumeData = body
+  }
+
+  /* ---------- HANDLE FORMDATA ---------- */
+  else {
+    const formData = await req.formData()
+
+    resumeId = formData.get("resumeId")
+    removeBackground = formData.get("removeBackground") === "yes"
+    image = formData.get("image")
+
+    const resumeDataRaw = formData.get("resumeData")
+    resumeData = JSON.parse(resumeDataRaw)
+  }
+
+  /* ---------- IMAGE UPLOAD ---------- */
   if (image) {
     const buffer = Buffer.from(await image.arrayBuffer())
 
-    const response = await imagekit.files.upload({
+    const upload = await imagekit.files.upload({
       file: buffer,
-      fileName: "user-resumes",
+      fileName: "resume-image",
       folder: "user-resumes",
       transformation: {
         pre:
           "w-300,h-300,fo-face,z-0.75" +
-          (removeBackground === "yes" ? ",e-bgremove" : "")
-      }
+          (removeBackground ? ",e-bgremove" : ""),
+      },
     })
 
-    resumeData.personal_info.image = response.url
+    resumeData.personal_info.image = upload.url
   }
 
-  await connectDB()
-
+  /* ---------- UPDATE RESUME ---------- */
   const resume = await Resume.findOneAndUpdate(
     { _id: resumeId, userId: session.user.id },
-    resumeData,
-    { new: true }
+    { $set: resumeData },
+    { new: true, runValidators: true }
   )
+
+  if (!resume) {
+    return NextResponse.json(
+      { message: "Resume not found or not updated" },
+      { status: 404 }
+    )
+  }
 
   return NextResponse.json({
     message: "Resume updated successfully",
-    resume
+    resume,
   })
 }
+

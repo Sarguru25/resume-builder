@@ -4,17 +4,17 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { logout } from '@/app/features/authSlice'
+import { signOut } from "next-auth/react"
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.auth)
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   const router = useRouter()
 
-  const logoutUser = () => {
-    dispatch(logout())
-    router.push('/')   // replace navigate('/')
-  }
+  // const logoutUser = () => {
+  //   dispatch(logout())
+  //   router.push('/')   // replace navigate('/')
+  // }
 
   return (
     <div className="shadow bg-white">
@@ -24,9 +24,9 @@ const Navbar = () => {
         </Link>
 
         <div className="max-sm:hidden flex items-center gap-4">
-          <p>Hi, {user?.name}</p>
+          {/* <p>Hi, {user?.name}</p> */}
           <button
-            onClick={logoutUser}
+            onClick={() => signOut({ callbackUrl: "/" })}
             className="bg-white hover:bg-slate-50 border border-gray-300 px-7 py-1.5 rounded-full active:scale-95 transition-all"
           >
             Logout

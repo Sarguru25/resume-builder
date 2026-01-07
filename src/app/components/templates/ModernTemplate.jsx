@@ -1,176 +1,263 @@
-import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
+import React, { useState } from "react";
+import { Mail, Phone, MapPin, Linkedin, Globe, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-const ModernTemplate = ({ data, accentColor }) => {
-	const formatDate = (dateStr) => {
-		if (!dateStr) return "";
-		const [year, month] = dateStr.split("-");
-		return new Date(year, month - 1).toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "short"
-		});
-	};
+// SortableItem component
+const SortableItem = ({ id, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return (
+    <div ref={setNodeRef} style={style} className="relative">
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute -left-8 top-0 cursor-grab active:cursor-grabbing p-1 rounded"
+        aria-label="Drag to reorder"
+      >
+        <GripVertical className="size-4 text-gray-400" />
+      </div>
+      {children}
+    </div>
+  );
+};
 
-	return (
-		<div className="max-w-4xl mx-auto bg-white text-gray-800">
-			{/* Header */}
-			<header className="p-8 text-white" style={{ backgroundColor: accentColor }}>
-				<h1 className="text-4xl font-light mb-3">
-					{data.personal_info?.full_name || "Your Name"}
-				</h1>
+const ModernTemplate = ({ data, accentColor = "#3B82F6" }) => {
+  const [sections, setSections] = useState([
+    "professional_summary",
+    "experience",
+    "projects",
+    "education",
+    "skills",
+    "participations",
+    "achievements",
+    "languages",
+    "custom_sections",
+  ]);
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ">
-					{data.personal_info?.email && (
-						<div className="flex items-center gap-2">
-							<Mail className="size-4" />
-							<span>{data.personal_info.email}</span>
-						</div>
-					)}
-					{data.personal_info?.phone && (
-						<div className="flex items-center gap-2">
-							<Phone className="size-4" />
-							<span>{data.personal_info.phone}</span>
-						</div>
-					)}
-					{data.personal_info?.location && (
-						<div className="flex items-center gap-2">
-							<MapPin className="size-4" />
-							<span>{data.personal_info.location}</span>
-						</div>
-					)}
-					{data.personal_info?.linkedin && (
-						<a target="_blank" href={data.personal_info?.linkedin} className="flex items-center gap-2">
-							<Linkedin className="size-4" />
-							<span className="break-all text-xs">{data.personal_info.linkedin.split("https://www.")[1] ? data.personal_info.linkedin.split("https://www.")[1] : data.personal_info.linkedin}</span>
-						</a>
-					)}
-					{data.personal_info?.website && (
-						<a target="_blank" href={data.personal_info?.website} className="flex items-center gap-2">
-							<Globe className="size-4" />
-							<span className="break-all text-xs">{data.personal_info.website.split("https://")[1] ? data.personal_info.website.split("https://")[1] : data.personal_info.website}</span>
-						</a>
-					)}
-				</div>
-			</header>
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
-			<div className="p-8">
-				{/* Professional Summary */}
-				{data.professional_summary && (
-					<section className="mb-8">
-						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
-							Professional Summary
-						</h2>
-						<p className="text-gray-700 ">{data.professional_summary}</p>
-					</section>
-				)}
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const [year, month] = dateStr.split("-");
+    return new Date(year, month - 1).toLocaleDateString("en-US", { year: "numeric", month: "short" });
+  };
 
-				{/* Experience */}
-				{data.experience && data.experience.length > 0 && (
-					<section className="mb-8">
-						<h2 className="text-2xl font-light mb-6 pb-2 border-b border-gray-200">
-							Experience
-						</h2>
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      setSections((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
-						<div className="space-y-6">
-							{data.experience.map((exp, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200">
+  const renderSection = (sectionKey) => {
+    const sectionClass = "mb-4 overflow-hidden"; // Added overflow-hidden to fit in page
+    switch (sectionKey) {
+      case "professional_summary":
+        return data.professional_summary ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>PROFESSIONAL SUMMARY</h2>
+              <p className="text-gray-700 text-sm leading-snug">{data.professional_summary}</p>
+            </section>
+          </SortableItem>
+        ) : null;
 
-									<div className="flex justify-between items-start mb-2">
-										<div>
-											<h3 className="text-xl font-medium text-gray-900">{exp.position}</h3>
-											<p className="font-medium" style={{ color: accentColor }}>{exp.company}</p>
-										</div>
-										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
-											{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-										</div>
-									</div>
-									{exp.description && (
-										<div className="text-gray-700 leading-relaxed mt-3 whitespace-pre-line">
-											{exp.description}
-										</div>
-									)}
-								</div>
-							))}
-						</div>
-					</section>
-				)}
+      case "experience":
+        return data.experience?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>EXPERIENCE</h2>
+              <div className="space-y-2 text-sm overflow-hidden">
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="border-l-2 pl-2">
+                    <div className="flex justify-between">
+                      <span className="font-semibold">{exp.position}</span>
+                      <span className="text-gray-500 text-xs">{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}</span>
+                    </div>
+                    <p className="text-gray-700">{exp.company}</p>
+                    {exp.description && <p className="text-gray-600 text-xs line-clamp-3">{exp.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </SortableItem>
+        ) : null;
 
-				{/* Projects */}
-				{data.project && data.project.length > 0 && (
-					<section className="mb-8">
-						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
-							Projects
-						</h2>
+      case "projects":
+        return data.projects?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>PROJECTS</h2>
+              <ul className="space-y-1 text-sm overflow-hidden">
+                {data.projects.map((proj, idx) => (
+                  <li key={idx} className="pl-2 border-l-2">
+                    <span className="font-semibold">{proj.name}</span>
+                    {proj.type && <span> ({proj.type})</span>}
+                    {proj.description && <p className="text-gray-700 text-xs line-clamp-2">{proj.description}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </SortableItem>
+        ) : null;
 
-						<div className="space-y-6">
-							{data.project.map((p, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
+      case "education":
+        return data.education?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>EDUCATION</h2>
+              <ul className="space-y-1 text-sm overflow-hidden">
+                {data.education.map((edu, idx) => (
+                  <li key={idx} className="pl-2 border-l-2">
+                    <span className="font-semibold">{edu.degree}{edu.field && ` in ${edu.field}`}</span>
+                    <p className="text-gray-700 text-xs">{edu.institution}</p>
+                    {edu.gpa && <p className="text-gray-500 text-xs">GPA: {edu.gpa}</p>}
+                    {edu.graduation_date && <p className="text-gray-500 text-xs">{formatDate(edu.graduation_date)}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </SortableItem>
+        ) : null;
 
+      case "skills":
+        return data.skills?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>SKILLS</h2>
+              <div className="flex flex-wrap gap-1 text-xs">
+                {data.skills.map((skill, idx) => (
+                  <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded">{skill}</span>
+                ))}
+              </div>
+            </section>
+          </SortableItem>
+        ) : null;
 
-									<div className="flex justify-between items-start">
-										<div>
-											<h3 className="text-lg font-medium text-gray-900">{p.name}</h3>
-										</div>
-									</div>
-									{p.description && (
-										<div className="text-gray-700 leading-relaxed text-sm mt-3">
-											{p.description}
-										</div>
-									)}
-								</div>
-							))}
-						</div>
-					</section>
-				)}
+      case "participations":
+        return data.participations?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>PARTICIPATIONS</h2>
+              <ul className="text-sm overflow-hidden">
+                {data.participations.map((p, idx) => (
+                  <li key={idx} className="pl-2 border-l-2 mb-1">
+                    <span className="font-semibold">{p.title}</span> - {p.organization} ({p.year})
+                    {p.description && <p className="text-gray-600 text-xs line-clamp-2">{p.description}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </SortableItem>
+        ) : null;
 
-				<div className="grid sm:grid-cols-2 gap-8">
-					{/* Education */}
-					{data.education && data.education.length > 0 && (
-						<section>
-							<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
-								Education
-							</h2>
+      case "achievements":
+        return data.achievements?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>ACHIEVEMENTS</h2>
+              <ul className="text-sm overflow-hidden">
+                {data.achievements.map((a, idx) => (
+                  <li key={idx} className="pl-2 border-l-2 mb-1">
+                    <span className="font-semibold">{a.title} ({a.year})</span>
+                    {a.description && <p className="text-gray-600 text-xs line-clamp-2">{a.description}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </SortableItem>
+        ) : null;
 
-							<div className="space-y-4">
-								{data.education.map((edu, index) => (
-									<div key={index}>
-										<h3 className="font-semibold text-gray-900">
-											{edu.degree} {edu.field && `in ${edu.field}`}
-										</h3>
-										<p style={{ color: accentColor }}>{edu.institution}</p>
-										<div className="flex justify-between items-center text-sm text-gray-600">
-											<span>{formatDate(edu.graduation_date)}</span>
-											{edu.gpa && <span>GPA: {edu.gpa}</span>}
-										</div>
-									</div>
-								))}
-							</div>
-						</section>
-					)}
+      case "languages":
+        return data.languages?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            <section className={sectionClass}>
+              <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>LANGUAGES</h2>
+              <div className="flex flex-wrap gap-1 text-xs">
+                {data.languages.map((l, idx) => (
+                  <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded">{l.language} ({l.proficiency})</span>
+                ))}
+              </div>
+            </section>
+          </SortableItem>
+        ) : null;
 
-					{/* Skills */}
-					{data.skills && data.skills.length > 0 && (
-						<section>
-							<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
-								Skills
-							</h2>
+      case "custom_sections":
+        return data.custom_sections?.length > 0 ? (
+          <SortableItem key={sectionKey} id={sectionKey}>
+            {data.custom_sections.map((section, idx) => (
+              <section key={idx} className={sectionClass}>
+                <h2 className="text-lg font-semibold mb-2" style={{ color: accentColor }}>{section.section_title}</h2>
+                <ul className="text-sm overflow-hidden">
+                  {section.items.map((item, i) => (
+                    <li key={i} className="pl-2 border-l-2 mb-1">
+                      <span className="font-semibold">{item.title}</span>
+                      {item.description && <p className="text-gray-600 text-xs line-clamp-2">{item.description}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </SortableItem>
+        ) : null;
 
-							<div className="flex flex-wrap gap-2">
-								{data.skills.map((skill, index) => (
-									<span
-										key={index}
-										className="px-3 py-1 text-sm text-white rounded-full"
-										style={{ backgroundColor: accentColor }}
-									>
-										{skill}
-									</span>
-								))}
-							</div>
-						</section>
-					)}
-				</div>
-			</div>
-		</div>
-	);
-}
+      default:
+        return null;
+    }
+  };
 
-export default ModernTemplate;
+  return (
+    <div
+      className="mx-auto p-4 bg-white text-gray-800 font-sans border border-gray-200 rounded-lg overflow-hidden"
+      style={{ width: "210mm", height: "297mm", boxSizing: "border-box", display: "flex", flexDirection: "column" }}
+    >
+      <style jsx>{`@media print { .drag-handle { display: none; } body { background: white; } }`}</style>
+
+      {/* Header */}
+      <header className="text-center mb-2 pb-2 border-b" style={{ flexShrink: 0 }}>
+        <h1 className="text-2xl font-bold" style={{ color: accentColor }}>{data.personal_info?.full_name || "Your Name"}</h1>
+        {data.personal_info?.profession && <p className="text-sm text-gray-600">{data.personal_info.profession}</p>}
+        <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-600 mt-1">
+          {data.personal_info?.email && <div className="flex items-center gap-1"><Mail className="size-4" />{data.personal_info.email}</div>}
+          {data.personal_info?.phone && <div className="flex items-center gap-1"><Phone className="size-4" />{data.personal_info.phone}</div>}
+          {data.personal_info?.location && <div className="flex items-center gap-1"><MapPin className="size-4" />{data.personal_info.location}</div>}
+          {data.personal_info?.linkedin && <div className="flex items-center gap-1"><Linkedin className="size-4" />{data.personal_info.linkedin}</div>}
+          {data.personal_info?.website && <div className="flex items-center gap-1"><Globe className="size-4" />{data.personal_info.website}</div>}
+        </div>
+      </header>
+
+      {/* Draggable Sections */}
+      <div className="flex-1 overflow-y-auto">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sections} strategy={verticalListSortingStrategy}>
+            {sections.map(renderSection)}
+          </SortableContext>
+        </DndContext>
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(ModernTemplate);

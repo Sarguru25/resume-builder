@@ -1,8 +1,7 @@
-// src/app/api/user/route.js
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/../lib/auth"
-import User from "@/../lib/models/User"
 import { connectDB } from "@/../lib/db"
+import User from "@/../lib/models/User"
 
 export async function GET() {
   const session = await getServerSession(authOptions)

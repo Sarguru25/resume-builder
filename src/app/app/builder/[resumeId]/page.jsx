@@ -12,9 +12,13 @@ import {
   FileText,
   Briefcase,
   GraduationCap,
-  ChevronLeft,
   FolderIcon,
   Sparkles,
+  Award,
+  Languages,
+  Users,
+  LayoutGrid,
+  ChevronLeft,
   ChevronRight,
   Share2Icon,
   DownloadIcon,
@@ -23,14 +27,19 @@ import {
 } from 'lucide-react'
 
 import PersonalInfoForm from '@/app/components/form/PersonalInfoForm'
-import TemplateSecector from '@/app/components/TemplateSecector'
-import ResumePreview from '@/app/components/ResumePreview'
-import ColorPicker from '@/app/components/ColorPicker'
 import ProfessionalSummary from '@/app/components/form/ProfessionalSummary'
 import ExperienceForm from '@/app/components/form/ExperienceForm'
 import EducationForm from '@/app/components/form/EducationForm'
 import ProjectForm from '@/app/components/form/ProjectForm'
 import SkillForm from '@/app/components/form/SkillForm'
+import ParticipationForm from '@/app/components/form/ParticipationsForm'
+import AchievementsForm from '@/app/components/form/AchievementsForm'
+import LanguagesKnown from '@/app/components/form/LanguagesKnown'
+import CustomForm from '@/app/components/form/CustomForm'
+
+import TemplateSecector from '@/app/components/TemplateSecector'
+import ResumePreview from '@/app/components/ResumePreview'
+import ColorPicker from '@/app/components/ColorPicker'
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams()
@@ -44,6 +53,10 @@ const ResumeBuilder = () => {
     education: [],
     projects: [],
     skills: [],
+    participations: [],
+    achievements: [],
+    languages: [],
+    custom_sections: [],
     template: 'classic',
     accent_color: '#3B82F6',
     public: false,
@@ -59,8 +72,11 @@ const ResumeBuilder = () => {
     { id: 'education', name: 'Education', icon: GraduationCap },
     { id: 'projects', name: 'Projects', icon: FolderIcon },
     { id: 'skills', name: 'Skills', icon: Sparkles },
+    { id: 'participations', name: 'Participations', icon: Users },
+    { id: 'achievements', name: 'Achievements', icon: Award },
+    { id: 'languages', name: 'Languages', icon: Languages },
+    { id: 'custom', name: 'Custom Sections', icon: LayoutGrid },
   ]
-
   const activeSection = sections[activeSectionIndex]
 
   /* ---------------- LOAD RESUME ---------------- */
@@ -84,45 +100,62 @@ const ResumeBuilder = () => {
   }, [resumeId, status])
 
   /* ---------------- SAVE RESUME ---------------- */
-  const saveResume = async () => {
-    const cloned = structuredClone(resumeData)
-    const formData = new FormData()
+const saveResume = async () => {
+  const cloned = structuredClone(resumeData)
+  const formData = new FormData()
 
-    if (typeof cloned.personal_info?.image === 'object') {
-      delete cloned.personal_info.image
-    }
+  formData.append("resumeId", resumeId)
 
-    formData.append('resumeData', JSON.stringify(cloned))
-    if (removeBackground) formData.append('removeBackground', 'yes')
-
-    if (typeof resumeData.personal_info?.image === 'object') {
-      formData.append('image', resumeData.personal_info.image)
-    }
-
-    const res = await fetch(`/api/resumes/${resumeId}`, {
-      method: 'PUT',
-      body: formData,
-    })
-
-    if (!res.ok) throw new Error('Failed to save')
+  if (typeof cloned.personal_info?.image === "object") {
+    delete cloned.personal_info.image
   }
+
+  formData.append("resumeData", JSON.stringify(cloned))
+
+  if (removeBackground) {
+    formData.append("removeBackground", "yes")
+  }
+
+  if (typeof resumeData.personal_info?.image === "object") {
+    formData.append("image", resumeData.personal_info.image)
+  }
+
+  const res = await fetch(`/api/resumes/${resumeId}`, {
+    method: "PUT",
+    body: formData,
+  })
+
+  if (!res.ok) {
+    throw new Error("Failed to save resume")
+  }
+}
+
 
   /* ---------------- PUBLIC / PRIVATE ---------------- */
-  const togglePublic = async () => {
-    try {
-      const res = await fetch(`/api/resumes/${resumeId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ public: !resumeData.public }),
-      })
+const togglePublic = async () => {
+  try {
+    const res = await fetch(`/api/resumes/${resumeId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        resumeId,
+        public: !resumeData.public,
+      }),
+    })
 
-      if (!res.ok) throw new Error()
-      setResumeData(prev => ({ ...prev, public: !prev.public }))
-      toast.success('Visibility updated')
-    } catch {
-      toast.error('Failed to update visibility')
-    }
+    if (!res.ok) throw new Error()
+
+    setResumeData(prev => ({
+      ...prev,
+      public: !prev.public,
+    }))
+
+    toast.success("Visibility updated")
+  } catch {
+    toast.error("Failed to update visibility")
   }
+}
+
 
   /* ---------------- SHARE & DOWNLOAD ---------------- */
   const handleShare = () => {
@@ -209,69 +242,77 @@ const ResumeBuilder = () => {
               </div>
 
               {/* Form Content */}
-              <div className="space-y-6">
-                {activeSection.id === 'personal' && (
-                  <PersonalInfoForm
-                    data={resumeData.personal_info}
-                    onChange={data =>
-                      setResumeData(prev => ({
-                        ...prev,
-                        personal_info: data,
-                      }))
-                    }
-                    removeBackground={removeBackground}
-                    setRemoveBackground={setRemoveBackground}
-                  />
-                )}
+            {activeSection.id === 'personal' && (
+              <PersonalInfoForm
+                data={resumeData.personal_info}
+                onChange={d => setResumeData(p => ({ ...p, personal_info: d }))}
+                removeBackground={removeBackground}
+                setRemoveBackground={setRemoveBackground}
+              />
+            )}
 
-                {activeSection.id === 'summary' && (
-                  <ProfessionalSummary
-                    data={resumeData.professional_summary}
-                    onChange={data =>
-                      setResumeData(prev => ({
-                        ...prev,
-                        professional_summary: data,
-                      }))
-                    }
-                  />
-                )}
+            {activeSection.id === 'summary' && (
+              <ProfessionalSummary
+                data={resumeData.professional_summary}
+                onChange={d => setResumeData(p => ({ ...p, professional_summary: d }))}
+              />
+            )}
 
-                {activeSection.id === 'experience' && (
-                  <ExperienceForm
-                    data={resumeData.experience}
-                    onChange={data =>
-                      setResumeData(prev => ({ ...prev, experience: data }))
-                    }
-                  />
-                )}
+            {activeSection.id === 'experience' && (
+              <ExperienceForm
+                data={resumeData.experience}
+                onChange={d => setResumeData(p => ({ ...p, experience: d }))}
+              />
+            )}
 
-                {activeSection.id === 'education' && (
-                  <EducationForm
-                    data={resumeData.education}
-                    onChange={data =>
-                      setResumeData(prev => ({ ...prev, education: data }))
-                    }
-                  />
-                )}
+            {activeSection.id === 'education' && (
+              <EducationForm
+                data={resumeData.education}
+                onChange={d => setResumeData(p => ({ ...p, education: d }))}
+              />
+            )}
 
-                {activeSection.id === 'projects' && (
-                  <ProjectForm
-                    data={resumeData.projects}
-                    onChange={data =>
-                      setResumeData(prev => ({ ...prev, projects: data }))
-                    }
-                  />
-                )}
+            {activeSection.id === 'projects' && (
+              <ProjectForm
+                data={resumeData.projects}
+                onChange={d => setResumeData(p => ({ ...p, projects: d }))}
+              />
+            )}
 
-                {activeSection.id === 'skills' && (
-                  <SkillForm
-                    data={resumeData.skills}
-                    onChange={data =>
-                      setResumeData(prev => ({ ...prev, skills: data }))
-                    }
-                  />
-                )}
-              </div>
+            {activeSection.id === 'skills' && (
+              <SkillForm
+                data={resumeData.skills}
+                onChange={d => setResumeData(p => ({ ...p, skills: d }))}
+              />
+            )}
+
+            {activeSection.id === 'participations' && (
+              <ParticipationForm
+                data={resumeData.participations}
+                onChange={d => setResumeData(p => ({ ...p, participations: d }))}
+              />
+            )}
+
+            {activeSection.id === 'achievements' && (
+              <AchievementsForm
+                data={resumeData.achievements}
+                onChange={d => setResumeData(p => ({ ...p, achievements: d }))}
+              />
+            )}
+
+            {activeSection.id === 'languages' && (
+              <LanguagesKnown
+                data={resumeData.languages}
+                onChange={d => setResumeData(p => ({ ...p, languages: d }))}
+              />
+            )}
+
+            {activeSection.id === 'custom' && (
+              <CustomForm
+                data={resumeData.custom_sections}
+                onChange={d => setResumeData(p => ({ ...p, custom_sections: d }))}
+              />
+            )}
 
               <button
                 onClick={() =>
