@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/../lib/auth"
-import { connectDB } from "@/../lib/db"
-import User from "@/../lib/models/User"
+import { authOptions } from "@/lib/auth"
+import { connectDB } from "@/lib/db"
+import User from "@/lib/models/User"
 
 export async function GET() {
   const session = await getServerSession(authOptions)

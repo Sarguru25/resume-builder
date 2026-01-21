@@ -24,6 +24,8 @@ import {
   DownloadIcon,
   EyeIcon,
   EyeOffIcon,
+  TypeIcon,
+  EditIcon, // Add this import
 } from 'lucide-react'
 
 import PersonalInfoForm from '@/app/components/form/PersonalInfoForm'
@@ -40,6 +42,7 @@ import CustomForm from '@/app/components/form/CustomForm'
 import TemplateSecector from '@/app/components/TemplateSecector'
 import ResumePreview from '@/app/components/ResumePreview'
 import ColorPicker from '@/app/components/ColorPicker'
+import TypographySettings from '@/app/components/TypographySettings' // Import the new component
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams()
@@ -52,7 +55,7 @@ const ResumeBuilder = () => {
     experience: [],
     education: [],
     projects: [],
-    skills: [],
+    skills: { technicalSkills: [], softSkills: [] },
     participations: [],
     achievements: [],
     languages: [],
@@ -64,6 +67,57 @@ const ResumeBuilder = () => {
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0)
   const [removeBackground, setRemoveBackground] = useState(false)
+  
+  // Add typography state
+  const [showTypographySettings, setShowTypographySettings] = useState(false)
+  const [selectedTypographySection, setSelectedTypographySection] = useState("header")
+  const [sectionTypographies, setSectionTypographies] = useState({
+    header: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    professional_summary: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    experience: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    projects: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    education: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    skills: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    participations: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    achievements: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+    languages: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: 14,
+      lineHeight: 1.5,
+    },
+  })
 
   const sections = [
     { id: 'personal', name: 'Personal Info', icon: User },
@@ -79,6 +133,17 @@ const ResumeBuilder = () => {
   ]
   const activeSection = sections[activeSectionIndex]
 
+  /* ---------------- TYPOGRAPHY FUNCTIONS ---------------- */
+  const updateTypography = (key, value) => {
+    setSectionTypographies((prev) => ({
+      ...prev,
+      [selectedTypographySection]: {
+        ...prev[selectedTypographySection],
+        [key]: value,
+      },
+    }));
+  };
+
   /* ---------------- LOAD RESUME ---------------- */
   useEffect(() => {
     if (!resumeId || status !== 'authenticated') return
@@ -90,6 +155,12 @@ const ResumeBuilder = () => {
 
         if (!res.ok) throw new Error(data.message)
         setResumeData(data.resume)
+        
+        // Load saved typography if exists
+        if (data.resume.typography) {
+          setSectionTypographies(data.resume.typography)
+        }
+        
         document.title = data.resume.title
       } catch (err) {
         toast.error(err.message)
@@ -100,62 +171,62 @@ const ResumeBuilder = () => {
   }, [resumeId, status])
 
   /* ---------------- SAVE RESUME ---------------- */
-const saveResume = async () => {
-  const cloned = structuredClone(resumeData)
-  const formData = new FormData()
+  const saveResume = async () => {
+    const cloned = structuredClone(resumeData)
+    const formData = new FormData()
 
-  formData.append("resumeId", resumeId)
+    formData.append("resumeId", resumeId)
 
-  if (typeof cloned.personal_info?.image === "object") {
-    delete cloned.personal_info.image
-  }
+    if (typeof cloned.personal_info?.image === "object") {
+      delete cloned.personal_info.image
+    }
 
-  formData.append("resumeData", JSON.stringify(cloned))
+    // Add typography to saved data
+    cloned.typography = sectionTypographies
 
-  if (removeBackground) {
-    formData.append("removeBackground", "yes")
-  }
+    formData.append("resumeData", JSON.stringify(cloned))
 
-  if (typeof resumeData.personal_info?.image === "object") {
-    formData.append("image", resumeData.personal_info.image)
-  }
+    if (removeBackground) {
+      formData.append("removeBackground", "yes")
+    }
 
-  const res = await fetch(`/api/resumes/${resumeId}`, {
-    method: "PUT",
-    body: formData,
-  })
+    if (typeof resumeData.personal_info?.image === "object") {
+      formData.append("image", resumeData.personal_info.image)
+    }
 
-  if (!res.ok) {
-    throw new Error("Failed to save resume")
-  }
-}
-
-
-  /* ---------------- PUBLIC / PRIVATE ---------------- */
-const togglePublic = async () => {
-  try {
     const res = await fetch(`/api/resumes/${resumeId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        resumeId,
-        public: !resumeData.public,
-      }),
+      body: formData,
     })
 
-    if (!res.ok) throw new Error()
-
-    setResumeData(prev => ({
-      ...prev,
-      public: !prev.public,
-    }))
-
-    toast.success("Visibility updated")
-  } catch {
-    toast.error("Failed to update visibility")
+    if (!res.ok) {
+      throw new Error("Failed to save resume")
+    }
   }
-}
 
+  /* ---------------- PUBLIC / PRIVATE ---------------- */
+  const togglePublic = async () => {
+    try {
+      const res = await fetch(`/api/resumes/${resumeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          public: !resumeData.public,
+        }),
+      })
+
+      if (!res.ok) throw new Error()
+
+      setResumeData(prev => ({
+        ...prev,
+        public: !prev.public,
+      }))
+
+      toast.success("Visibility updated")
+    } catch {
+      toast.error("Failed to update visibility")
+    }
+  }
 
   /* ---------------- SHARE & DOWNLOAD ---------------- */
   const handleShare = () => {
@@ -211,6 +282,20 @@ const togglePublic = async () => {
                       setResumeData(prev => ({ ...prev, accent_color: color }))
                     }
                   />
+                  {/* <TypographySettings
+                    sectionTypographies={sectionTypographies}
+                    selectedSection={selectedTypographySection}
+                    onUpdateTypography={updateTypography}
+                    onSelectSection={setSelectedTypographySection}
+                  /> */}
+
+                  <button
+                    onClick={() => setShowTypographySettings(!showTypographySettings)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+                  >
+                    <EditIcon className="size-4" />
+                    Edit
+                  </button>
                 </div>
 
                 <div className="flex items-center">
@@ -230,10 +315,9 @@ const togglePublic = async () => {
                         Math.min(i + 1, sections.length - 1)
                       )
                     }
-                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
-                      activeSectionIndex === sections.length - 1 &&
+                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 &&
                       'opacity-50'
-                    }`}
+                      }`}
                     disabled={activeSectionIndex === sections.length - 1}
                   >
                     Next <ChevronRight className="size-4" />
@@ -241,78 +325,92 @@ const togglePublic = async () => {
                 </div>
               </div>
 
+              {/* Typography Settings Panel */}
+              {showTypographySettings && (
+                <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <TypographySettings
+                    sectionTypographies={sectionTypographies}
+                    selectedSection={selectedTypographySection}
+                    onUpdateTypography={updateTypography}
+                    onSelectSection={setSelectedTypographySection}
+                    onClose={() => setShowTypographySettings(false)}
+                  />
+                </div>
+              )}
+
               {/* Form Content */}
-            {activeSection.id === 'personal' && (
-              <PersonalInfoForm
-                data={resumeData.personal_info}
-                onChange={d => setResumeData(p => ({ ...p, personal_info: d }))}
-                removeBackground={removeBackground}
-                setRemoveBackground={setRemoveBackground}
-              />
-            )}
+              {activeSection.id === 'personal' && (
+                <PersonalInfoForm
+                  data={resumeData.personal_info}
+                  onChange={d => setResumeData(p => ({ ...p, personal_info: d }))}
+                  removeBackground={removeBackground}
+                  setRemoveBackground={setRemoveBackground}
+                />
+              )}
 
-            {activeSection.id === 'summary' && (
-              <ProfessionalSummary
-                data={resumeData.professional_summary}
-                onChange={d => setResumeData(p => ({ ...p, professional_summary: d }))}
-              />
-            )}
+              {activeSection.id === 'summary' && (
+                <ProfessionalSummary
+                  data={resumeData.professional_summary}
+                  onChange={(value) => setResumeData(prev => ({ ...prev, professional_summary: value }))}
+                  setResumeData={setResumeData}
+                />
+              )}
 
-            {activeSection.id === 'experience' && (
-              <ExperienceForm
-                data={resumeData.experience}
-                onChange={d => setResumeData(p => ({ ...p, experience: d }))}
-              />
-            )}
+              {activeSection.id === 'experience' && (
+                <ExperienceForm
+                  data={resumeData.experience}
+                  onChange={d => setResumeData(p => ({ ...p, experience: d }))}
+                />
+              )}
 
-            {activeSection.id === 'education' && (
-              <EducationForm
-                data={resumeData.education}
-                onChange={d => setResumeData(p => ({ ...p, education: d }))}
-              />
-            )}
+              {activeSection.id === 'education' && (
+                <EducationForm
+                  data={resumeData.education}
+                  onChange={d => setResumeData(p => ({ ...p, education: d }))}
+                />
+              )}
 
-            {activeSection.id === 'projects' && (
-              <ProjectForm
-                data={resumeData.projects}
-                onChange={d => setResumeData(p => ({ ...p, projects: d }))}
-              />
-            )}
+              {activeSection.id === 'projects' && (
+                <ProjectForm
+                  data={resumeData.projects}
+                  onChange={d => setResumeData(p => ({ ...p, projects: d }))}
+                />
+              )}
 
-            {activeSection.id === 'skills' && (
-              <SkillForm
-                data={resumeData.skills}
-                onChange={d => setResumeData(p => ({ ...p, skills: d }))}
-              />
-            )}
+              {activeSection.id === 'skills' && (
+                <SkillForm
+                  data={resumeData.skills}
+                  onChange={d => setResumeData(p => ({ ...p, skills: d }))}
+                />
+              )}
 
-            {activeSection.id === 'participations' && (
-              <ParticipationForm
-                data={resumeData.participations}
-                onChange={d => setResumeData(p => ({ ...p, participations: d }))}
-              />
-            )}
+              {activeSection.id === 'participations' && (
+                <ParticipationForm
+                  data={resumeData.participations}
+                  onChange={d => setResumeData(p => ({ ...p, participations: d }))}
+                />
+              )}
 
-            {activeSection.id === 'achievements' && (
-              <AchievementsForm
-                data={resumeData.achievements}
-                onChange={d => setResumeData(p => ({ ...p, achievements: d }))}
-              />
-            )}
+              {activeSection.id === 'achievements' && (
+                <AchievementsForm
+                  data={resumeData.achievements}
+                  onChange={d => setResumeData(p => ({ ...p, achievements: d }))}
+                />
+              )}
 
-            {activeSection.id === 'languages' && (
-              <LanguagesKnown
-                data={resumeData.languages}
-                onChange={d => setResumeData(p => ({ ...p, languages: d }))}
-              />
-            )}
+              {activeSection.id === 'languages' && (
+                <LanguagesKnown
+                  data={resumeData.languages}
+                  onChange={d => setResumeData(p => ({ ...p, languages: d }))}
+                />
+              )}
 
-            {activeSection.id === 'custom' && (
-              <CustomForm
-                data={resumeData.custom_sections}
-                onChange={d => setResumeData(p => ({ ...p, custom_sections: d }))}
-              />
-            )}
+              {activeSection.id === 'custom' && (
+                <CustomForm
+                  data={resumeData.custom_sections}
+                  onChange={d => setResumeData(p => ({ ...p, custom_sections: d }))}
+                />
+              )}
 
               <button
                 onClick={() =>
@@ -365,6 +463,7 @@ const togglePublic = async () => {
               data={resumeData}
               template={resumeData.template}
               accentColor={resumeData.accent_color}
+              sectionTypographies={sectionTypographies} // Pass typography to preview
             />
           </div>
         </div>

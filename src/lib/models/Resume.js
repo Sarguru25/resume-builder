@@ -34,46 +34,21 @@ const resumeSchema = new mongoose.Schema(
 
     /* ================= PERSONAL INFO ================= */
     personal_info: {
-      image: {
-        type: String,
-        default: "",
-      },
-      full_name: {
-        type: String,
-        default: "",
-      },
-      profession: {
-        type: String,
-        default: "",
-      },
-      email: {
-        type: String,
-        default: "",
-      },
-      phone: {
-        type: String,
-        default: "",
-      },
-      location: {
-        type: String,
-        default: "",
-      },
-      linkedin: {
-        type: String,
-        default: "",
-      },
-      website: {
-        type: String,
-        default: "",
-      },
+      image: { type: String, default: "" },
+      full_name: { type: String, default: "" },
+      profession: { type: String, default: "" },
+      email: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      location: { type: String, default: "" },
+      linkedin: { type: String, default: "" },
+      website: { type: String, default: "" },
     },
 
     /* ================= SKILLS ================= */
-    skills: [
-      {
-        type: String,
-      },
-    ],
+    skills: {
+      technicalSkills: { type: [String], default: [] },
+      softSkills: { type: [String], default: [] },
+    },
 
     /* ================= EXPERIENCE ================= */
     experience: [
@@ -140,7 +115,7 @@ const resumeSchema = new mongoose.Schema(
     /* ================= CUSTOM SECTIONS ================= */
     custom_sections: [
       {
-        section_title: { type: String }, // e.g. Certifications, Volunteering
+        section_title: { type: String },
         items: [
           {
             title: { type: String },
@@ -156,7 +131,6 @@ const resumeSchema = new mongoose.Schema(
   }
 );
 
-const Resume =
-  mongoose.models.Resume || mongoose.model("Resume", resumeSchema);
+const Resume = mongoose.models.Resume || mongoose.model("Resume", resumeSchema);
 
 export default Resume;

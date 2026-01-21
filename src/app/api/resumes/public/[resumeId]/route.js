@@ -1,5 +1,5 @@
-import Resume from "@/../lib/models/Resume"
-import { connectDB } from "@/../lib/db"
+import Resume from "@/lib/models/Resume"
+import { connectDB } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 // GET /api/resumes/public/:resumeId

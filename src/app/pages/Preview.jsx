@@ -31,7 +31,7 @@ const Preview = () => {
 
   useEffect(() => {
     if (resumeId) loadResume()
-  }, [resumeId])
+  }, [resumeId]accent)
 
   if (isLoading) {
     return <Loader />

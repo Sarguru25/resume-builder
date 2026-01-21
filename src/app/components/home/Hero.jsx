@@ -3,8 +3,8 @@
 import React from 'react'
 // import { useSelector } from 'react-redux';
 import Link from 'next/link'
-const Hero = () => {
 
+const Hero = () => {
     // const {user} = useSelector((state) => state.auth);
     const user = null
  
@@ -46,23 +46,63 @@ const Hero = () => {
                         </Link>
                     </div>
 
-                    <button onClick={() => setMenuOpen(true)} className="md:hidden active:scale-90 transition" >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2" className="lucide lucide-menu" >
-                            <path d="M4 5h16M4 12h16M4 19h16" />
-                        </svg>
+                    {/* Improved Hamburger Button */}
+                    <button 
+                        onClick={() => setMenuOpen(!menuOpen)} 
+                        className="md:hidden relative w-8 h-8 flex flex-col justify-center items-center focus:outline-none focus:ring-2 focus:ring-green-500 rounded"
+                        aria-label="Toggle menu"
+                    >
+                        <span className={`block w-5 h-0.5 bg-slate-800 transition-transform duration-300 ${menuOpen ? 'rotate-45 translate-y-1' : '-translate-y-1'}`}></span>
+                        <span className={`block w-5 h-0.5 bg-slate-800 transition-opacity duration-300 ${menuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+                        <span className={`block w-5 h-0.5 bg-slate-800 transition-transform duration-300 ${menuOpen ? '-rotate-45 -translate-y-1' : 'translate-y-1'}`}></span>
                     </button>
                 </nav>
 
-                {/* Mobile Menu */}
-                <div className={`fixed inset-0 z-10 bg-black/40 text-black backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`} >
-                    <a href="#" className="text-white">Home</a>
-                    <a href="#features" className="text-white">Features</a>
-                    <a href="#testimonials" className="text-white">Testimonials</a>
-                    <a href="#cta" className="text-white">Contact</a>
-                    <button onClick={() => setMenuOpen(false)} className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-green-600 hover:bg-green-700 transition text-white rounded-md flex" >
-                        X
-                    </button>
+                {/* Improved Mobile Menu */}
+                <div 
+                    className={`fixed top-0 left-0 w-full bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out ${menuOpen ? 'translate-y-0' : '-translate-y-full'}`}
+                    style={{ height: 'auto', minHeight: '100vh' }} // Ensure it covers the screen
+                >
+                    {/* Menu Header */}
+                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                        <img src="/logo.svg" alt="logo" className='h-8 w-auto' />
+                        <button 
+                            onClick={() => setMenuOpen(false)} 
+                            className="p-2 rounded-full hover:bg-gray-100 transition"
+                            aria-label="Close menu"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" className="lucide lucide-x">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Menu Links */}
+                    <div className="flex flex-col items-center gap-6 py-8 text-lg">
+                        <a href="#" className="text-slate-800 hover:text-green-600 transition" onClick={() => setMenuOpen(false)}>Home</a>
+                        <a href="#features" className="text-slate-800 hover:text-green-600 transition" onClick={() => setMenuOpen(false)}>Features</a>
+                        <a href="#testimonials" className="text-slate-800 hover:text-green-600 transition" onClick={() => setMenuOpen(false)}>Testimonials</a>
+                        <a href="#cta" className="text-slate-800 hover:text-green-600 transition" onClick={() => setMenuOpen(false)}>Contact</a>
+                    </div>
+
+                    {/* CTA Buttons */}
+                    <div className="flex flex-col items-center gap-4 px-6 pb-8">
+                        <Link href='/app' className="w-full max-w-xs bg-green-500 hover:bg-green-600 text-white rounded-full px-6 py-3 text-center transition" onClick={() => setMenuOpen(false)}>
+                            Get started
+                        </Link>
+                        <Link href='/app?state=login' className="w-full max-w-xs border border-slate-400 hover:bg-green-50 text-slate-700 rounded-full px-6 py-3 text-center transition" onClick={() => setMenuOpen(false)}>
+                            Login
+                        </Link>
+                    </div>
                 </div>
+
+                {/* Backdrop for Mobile Menu */}
+                {menuOpen && (
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-30 md:hidden" 
+                        onClick={() => setMenuOpen(false)}
+                    ></div>
+                )}
 
                 {/* Hero Section */}
                 <div className="relative flex flex-col items-center justify-center text-sm px-4 md:px-16 lg:px-24 xl:px-40 text-black">
@@ -92,7 +132,7 @@ const Hero = () => {
 
                     {/* Headline + CTA */}
                     <h1 className="text-5xl md:text-6xl font-semibold max-w-5xl text-center mt-4 md:leading-[70px]">
-                        Land your dream job with <span className=" bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent text-nowrap">AI-powered </span> resumes.
+                        Create Professional Resumes in Minutes  <span className=" bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent text-nowrap"> with AI </span>
                     </h1>
 
                     <p className="max-w-md text-center text-base my-7">Create a professional resume in minutes with our AI-powered resume builder.</p>
@@ -110,8 +150,8 @@ const Hero = () => {
                     </div>
 
                     {/* <p className="py-6 text-slate-600 mt-14">Trusting by leading brands, including</p> */}
-{/* 
-                    <div className="flex flex-wrap justify-between max-sm:justify-center gap-6 max-w-3xl w-full mx-auto py-4" id="logo-container">
+
+                    {/* <div className="flex flex-wrap justify-between max-sm:justify-center gap-6 max-w-3xl w-full mx-auto py-4" id="logo-container">
                         {logos.map((logo, index) => <img key={index} src={logo} alt="logo" className="h-6 w-auto max-w-xs" />)}
                     </div> */}
                 </div>
@@ -126,9 +166,7 @@ const Hero = () => {
                 `}
             </style>
         </>
-
     )
 }
 
 export default Hero
-

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/../lib/auth"
-import Resume from "@/../lib/models/Resume"
-import { connectDB } from "@/../lib/db"
+import { authOptions } from "@/lib/auth"
+import Resume from "@/lib/models/Resume"
+import { connectDB } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 // GET: /api/resumes (get all user resumes)
