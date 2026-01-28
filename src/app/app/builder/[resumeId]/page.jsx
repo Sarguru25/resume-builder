@@ -67,7 +67,7 @@ const ResumeBuilder = () => {
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0)
   const [removeBackground, setRemoveBackground] = useState(false)
-  
+
   // Add typography state
   const [showTypographySettings, setShowTypographySettings] = useState(false)
   const [selectedTypographySection, setSelectedTypographySection] = useState("header")
@@ -155,12 +155,12 @@ const ResumeBuilder = () => {
 
         if (!res.ok) throw new Error(data.message)
         setResumeData(data.resume)
-        
+
         // Load saved typography if exists
         if (data.resume.typography) {
           setSectionTypographies(data.resume.typography)
         }
-        
+
         document.title = data.resume.title
       } catch (err) {
         toast.error(err.message)
@@ -236,7 +236,32 @@ const ResumeBuilder = () => {
       : alert(url)
   }
 
-  const handleDownload = () => window.print()
+  // const handleDownload = () => window.print()
+
+  const handleDownload = async () => {
+    try {
+      const resumeElement = document.getElementById('resume-preview'); // add id to your ResumePreview
+      const html = resumeElement.outerHTML;
+
+      const response = await fetch('/api/resumes/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: document.getElementById('resume-preview').outerHTML }),
+      });
+
+
+      if (!response.ok) throw new Error('Failed to generate PDF');
+
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'resume.pdf';
+      link.click();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
 
   /* ---------------- AUTH GUARD ---------------- */
   if (status === 'loading') return null
@@ -458,8 +483,9 @@ const ResumeBuilder = () => {
                 </button>
               </div>
             </div>
-
             <ResumePreview
+              id="resume-preview"
+              className="-m-[3px]"
               data={resumeData}
               template={resumeData.template}
               accentColor={resumeData.accent_color}

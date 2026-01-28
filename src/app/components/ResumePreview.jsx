@@ -50,8 +50,8 @@ const ResumePreview = ({ data, template, accentColor, sectionTypographies, class
 
             @media print{
             html,body{
-            width: 8.5in;
-            height: 11in;
+            width: 210mm;
+            height: 297mm;
             overflow: hidden;
             }
             body * {
@@ -64,10 +64,10 @@ const ResumePreview = ({ data, template, accentColor, sectionTypographies, class
             position: absolute;
             left: 0;
             top: 0;
-            width:100%;
-            height:auto;
+            width:210mm;
+            height:297mm;
             margin:0;
-            padding:0;
+            padding: 0;
             box-shadow: none !important;
             border: none !important;
             }

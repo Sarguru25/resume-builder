@@ -1,278 +1,254 @@
 import React, { useState } from "react";
-import { Mail, Phone, MapPin, Linkedin, Globe, GripVertical } from "lucide-react";
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
+  Globe,
+  GripVertical,
+} from "lucide-react";
 
-// SortableItem component for each draggable section
-const SortableItem = ({ id, children }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+/* =========================
+   Sortable Section Wrapper
+========================= */
+const SortableItem = ({ index, total, onMoveUp, onMoveDown, children }) => {
+  const [hover, setHover] = useState(false);
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
       <div
-        {...attributes}
-        {...listeners}
-        className="absolute -left-8 top-0 cursor-grab active:cursor-grabbing p-1 rounded"
-        aria-label="Drag to reorder"
+        className="print:hidden"
+        style={{
+          position: "absolute",
+          left: "-28px",
+          top: "4px",
+          opacity: hover ? 1 : 0,
+          transition: "0.2s",
+        }}
       >
-        <GripVertical className="size-4 text-gray-400" />
+        <GripVertical size={14} />
+        {index > 0 && <button onClick={onMoveUp}>↑</button>}
+        {index < total - 1 && <button onClick={onMoveDown}>↓</button>}
       </div>
       {children}
     </div>
   );
 };
 
-const ClassicTemplate = ({ data, accentColor = "#3B82F6" }) => {
-  const [sections, setSections] = useState([
-    "professional_summary",
-    "experience",
-    "projects",
-    "education",
+/* =========================
+   Architect Resume Template
+========================= */
+const ArchitectTemplate = ({ data, accentColor = "#000" }) => {
+  const [leftSections, setLeftSections] = useState([
+    "about",
     "skills",
+    "certifications",
+    "awards",
   ]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const [rightSections, setRightSections] = useState([
+    "education",
+    "experience",
+  ]);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const [year, month] = dateStr.split("-");
-    return new Date(year, month - 1).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-    });
+  const move = (list, setList, i, dir) => {
+    const n = dir === "up" ? i - 1 : i + 1;
+    if (n < 0 || n >= list.length) return;
+    const copy = [...list];
+    [copy[i], copy[n]] = [copy[n], copy[i]];
+    setList(copy);
   };
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (active.id !== over.id) {
-      setSections((items) => {
-        const oldIndex = items.indexOf(active.id);
-        const newIndex = items.indexOf(over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
+  const styles = {
+    page: {
+      width: "210mm",
+      minHeight: "297mm",
+      background: "#fff",
+      margin: "auto",
+      padding: "2rem",
+      fontFamily: "Inter, sans-serif",
+      color: "#111",
+    },
+    header: {
+      display: "flex",
+      justifyContent: "space-between",
+      borderBottom: "1px solid #000",
+      paddingBottom: "1rem",
+      marginBottom: "1.5rem",
+    },
+    name: { fontSize: 32, fontWeight: 800 },
+    profession: {
+      background: "#e5e7eb",
+      padding: "2px 6px",
+      display: "inline-block",
+      marginTop: "4px",
+    },
+    columns: { display: "flex", gap: "2rem" },
+    left: { width: "40%" },
+    right: { width: "60%" },
+    h2: {
+      fontSize: 14,
+      fontWeight: 700,
+      marginBottom: "0.5rem",
+      borderBottom: "1px solid #000",
+      paddingBottom: "2px",
+    },
+    textSm: { fontSize: 12, lineHeight: 1.5 },
+    item: { marginBottom: "1rem" },
+    skillBar: {
+      height: "3px",
+      background: "#000",
+      width: "40px",
+      marginRight: "8px",
+    },
   };
 
-  const renderSection = (sectionKey) => {
-    switch (sectionKey) {
-      case "professional_summary":
-        return data.professional_summary ? (
-          <SortableItem key={sectionKey} id={sectionKey}>
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold mb-3" style={{ color: accentColor }}>
-                PROFESSIONAL SUMMARY
-              </h2>
-              <p className="text-gray-700 leading-relaxed p-4 rounded-lg ">
-                {data.professional_summary}
-              </p>
+  /* ---------- LEFT ---------- */
+  const renderLeft = (key, i) => {
+    switch (key) {
+      case "about":
+        return (
+          <SortableItem key={key} index={i} total={leftSections.length}
+            onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
+            onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
+          >
+            <section style={styles.item}>
+              <h2 style={styles.h2}>ABOUT ME</h2>
+              <p style={styles.textSm}>{data.professional_summary}</p>
             </section>
           </SortableItem>
-        ) : null;
-
-      case "experience":
-        return data.experience && data.experience.length > 0 ? (
-          <SortableItem key={sectionKey} id={sectionKey}>
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
-                PROFESSIONAL EXPERIENCE
-              </h2>
-              <div className="space-y-4">
-                {data.experience.map((exp, index) => (
-                  <div key={index} className="border-l-4 pl-4 py-2 bg-white rounded-r-lg" >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{exp.position}</h3>
-                        <p className="text-gray-700 font-medium">{exp.company}</p>
-                      </div>
-                      <div className="text-right text-sm text-gray-600">
-                        <p>{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}</p>
-                      </div>
-                    </div>
-                    {exp.description && (
-                      <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                        {exp.description}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          </SortableItem>
-        ) : null;
-
-      case "projects":
-        return data.projects && data.projects.length > 0 ? (
-          <SortableItem key={sectionKey} id={sectionKey}>
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
-                PROJECTS
-              </h2>
-              <ul className="space-y-3">
-                {data.projects.map((proj, index) => (
-                  <li key={index} className="border-l-4 pl-6 py-2  rounded-r-lg" style={{ borderColor: "#d1d5db" }}>
-                    <div>
-                      <span className="font-semibold text-gray-800">{proj.name} {proj.type && `(${proj.type})`}</span>
-                      <p className="text-gray-600 whitespace-pre-line mt-1">{proj.description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </SortableItem>
-        ) : null;
-
-      case "education":
-        return data.education && data.education.length > 0 ? (
-          <SortableItem key={sectionKey} id={sectionKey}>
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
-                EDUCATION
-              </h2>
-              <div className="space-y-3">
-                {data.education.map((edu, index) => (
-                  <div key={index} className="flex justify-between items-start py-2 bg-white rounded-lg p-4">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {edu.degree} {edu.field && `in ${edu.field}`}
-                      </h3>
-                      <p className="text-gray-700">{edu.institution}</p>
-                      {edu.gpa && <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <p>{formatDate(edu.graduation_date)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </SortableItem>
-        ) : null;
+        );
 
       case "skills":
-        return data.skills && data.skills.length > 0 ? (
-          <SortableItem key={sectionKey} id={sectionKey}>
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
-                 CORE SKILLS
-              </h2>
-              <div className="flex gap-4 flex-wrap  p-4 rounded-lg">
-                {data.skills.map((skill, index) => (
-                  <span key={index} className="bg-white px-3 py-1 rounded-full text-gray-700 ">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+        return (
+          <SortableItem key={key} index={i} total={leftSections.length}
+            onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
+            onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
+          >
+            <section style={styles.item}>
+              <h2 style={styles.h2}>SKILLS</h2>
+              {data.skills?.technicalSkills?.map((s, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center" }}>
+                  <div style={styles.skillBar} />
+                  <span style={styles.textSm}>{s}</span>
+                </div>
+              ))}
             </section>
           </SortableItem>
-        ) : null;
+        );
 
+      case "certifications":
+        return (
+          <SortableItem key={key} index={i} total={leftSections.length}
+            onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
+            onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
+          >
+            <section style={styles.item}>
+              <h2 style={styles.h2}>CERTIFICATIONS</h2>
+              {data.custom_sections?.[0]?.items?.map((c, i) => (
+                <div key={i} style={styles.textSm}>{c.title}</div>
+              ))}
+            </section>
+          </SortableItem>
+        );
+
+      case "awards":
+        return (
+          <SortableItem key={key} index={i} total={leftSections.length}
+            onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
+            onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
+          >
+            <section style={styles.item}>
+              <h2 style={styles.h2}>AWARDS</h2>
+              {data.achievements?.map((a, i) => (
+                <div key={i}>
+                  <strong style={styles.textSm}>{a.title}</strong>
+                  <div style={styles.textSm}>{a.year}</div>
+                </div>
+              ))}
+            </section>
+          </SortableItem>
+        );
       default:
         return null;
     }
   };
 
-  return (
-    <div
-      className="max-w-none mx-auto p-8 bg-white text-gray-800 leading-relaxed font-sans border-2 border-gray-200 rounded-lg"
-      style={{
-        width: "210mm",
-        height: "297mm",
-        boxSizing: "border-box",
-        overflow: "hidden",
-        margin: "0 auto",
-      }}
-    >
-      {/* Print Styles */}
-      <style jsx>{`
-        @media print {
-          .drag-handle { display: none; }
-          body { background: white; }
-        }
-      `}</style>
+  /* ---------- RIGHT ---------- */
+  const renderRight = (key, i) => {
+    switch (key) {
+      case "education":
+        return (
+          <SortableItem key={key} index={i} total={rightSections.length}
+            onMoveUp={() => move(rightSections, setRightSections, i, "up")}
+            onMoveDown={() => move(rightSections, setRightSections, i, "down")}
+          >
+            <section style={styles.item}>
+              <h2 style={styles.h2}>EDUCATION</h2>
+              {data.education?.map((e, i) => (
+                <div key={i}>
+                  <strong style={styles.textSm}>
+                    {e.degree} | {e.graduation_date}
+                  </strong>
+                  <div style={styles.textSm}>{e.institution}</div>
+                </div>
+              ))}
+            </section>
+          </SortableItem>
+        );
 
+      case "experience":
+        return (
+          <SortableItem key={key} index={i} total={rightSections.length}
+            onMoveUp={() => move(rightSections, setRightSections, i, "up")}
+            onMoveDown={() => move(rightSections, setRightSections, i, "down")}
+          >
+            <section style={styles.item}>
+              <h2 style={styles.h2}>EXPERIENCE</h2>
+              {data.experience?.map((e, i) => (
+                <div key={i} style={{ marginBottom: "1rem" }}>
+                  <strong style={styles.textSm}>
+                    {e.position} | {e.start_date} – {e.is_current ? "Present" : e.end_date}
+                  </strong>
+                  <div style={styles.textSm}>{e.company}</div>
+                  <p style={styles.textSm}>{e.description}</p>
+                </div>
+              ))}
+            </section>
+          </SortableItem>
+        );
+      default:
+        return null;
+    }
+  };
+
+  /* ---------- RENDER ---------- */
+  return (
+    <div style={styles.page}>
       {/* Header */}
-      <header className="text-center mb-8 pb-6 border-b-4 " >
-        <h1 className="text-4xl font-bold mb-2" style={{ color: accentColor }}>
-          {data.personal_info?.full_name || "Your Name"}
-        </h1>
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
-          {data.personal_info?.email && (
-            <div className="flex items-center gap-1">
-              <Mail className="size-4" />
-              <span>{data.personal_info.email}</span>
-            </div>
-          )}
-          {data.personal_info?.phone && (
-            <div className="flex items-center gap-1">
-              <Phone className="size-4" />
-              <span>{data.personal_info.phone}</span>
-            </div>
-          )}
-          {data.personal_info?.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="size-4" />
-              <span>{data.personal_info.location}</span>
-            </div>
-          )}
-          {data.personal_info?.linkedin && (
-            <div className="flex items-center gap-1">
-              <Linkedin className="size-4" />
-              <span className="break-all">{data.personal_info.linkedin}</span>
-            </div>
-          )}
-          {data.personal_info?.website && (
-            <div className="flex items-center gap-1">
-              <Globe className="size-4" />
-              <span className="break-all">{data.personal_info.website}</span>
-            </div>
-          )}
+      <header style={styles.header}>
+        <div>
+          <div style={styles.name}>{data.personal_info?.full_name}</div>
+          <div style={styles.profession}>{data.personal_info?.profession}</div>
+        </div>
+        <div style={{ fontSize: 12 }}>
+          {data.personal_info?.phone && <div><Phone size={12} /> {data.personal_info.phone}</div>}
+          {data.personal_info?.email && <div><Mail size={12} /> {data.personal_info.email}</div>}
+          {data.personal_info?.linkedin && <div><Linkedin size={12} /> {data.personal_info.linkedin}</div>}
+          {data.personal_info?.location && <div><MapPin size={12} /> {data.personal_info.location}</div>}
         </div>
       </header>
 
-      {/* Draggable Sections */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={sections} strategy={verticalListSortingStrategy}>
-          {sections.map((section) => renderSection(section))}
-        </SortableContext>
-      </DndContext>
+      <div style={styles.columns}>
+        <aside style={styles.left}>{leftSections.map(renderLeft)}</aside>
+        <main style={styles.right}>{rightSections.map(renderRight)}</main>
+      </div>
     </div>
   );
 };
 
-export default React.memo(ClassicTemplate);
+export default React.memo(ArchitectTemplate);
