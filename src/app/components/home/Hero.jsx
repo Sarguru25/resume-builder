@@ -105,11 +105,11 @@ const Hero = () => {
                 )}
 
                 {/* Hero Section */}
-                <div className="relative flex flex-col items-center justify-center text-sm px-4 md:px-16 lg:px-24 xl:px-40 text-black">
-                    <div className="absolute top-28 xl:top-10 -z-10 left-1/4 size-72 sm:size-96 xl:size-120 2xl:size-132 bg-green-300 blur-[100px] opacity-30"></div>
+                <div className="p-40 relative flex flex-col items-center justify-center text-sm px-4 md:px-16 lg:px-24 xl:px-40 text-black">
+                    <div className=" absolute top-28 xl:top-10 -z-10 left-1/4 size-72 sm:size-96 xl:size-120 2xl:size-132 bg-green-300 blur-[100px] opacity-30"></div>
 
                     {/* Avatars + Stars */}
-                    <div className="flex items-center mt-24">
+                    {/* <div className="flex items-center mt-24">
                         <div className="flex -space-x-3 pr-3">
                             <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" alt="user3" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-[1]" />
                             <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200" alt="user1" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-2" />
@@ -128,7 +128,7 @@ const Hero = () => {
                                 Used by 10,000+ users
                             </p>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Headline + CTA */}
                     <h1 className="text-5xl md:text-6xl font-semibold max-w-5xl text-center mt-4 md:leading-[70px]">

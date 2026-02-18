@@ -45,7 +45,10 @@ const colors = [
 
   return (
     <div className='relative color-picker-container'>
-      <button onClick={()=>setIsOpen(!isOpen)} className='flex items-center gap-1 text-sm text-purple-600 bg-gradient-to-br from-purple-50 to-purple-100 ring-purple-100 hover:ring transition-all px-3 py-2 rounded-lg'>
+      <button onClick={()=>setIsOpen(!isOpen)} className='flex items-center gap-2 text-sm font-medium
+        bg-gradient-to-br from-blue-50 to-blue-100
+        text-blue-700 ring-1 ring-blue-300/60
+        hover:ring-blue-400 transition px-3 py-2 rounded-lg'>
         <Palette size={16} /> <span className='max-sm:hidden'>Accent</span>
       </button>
       {isOpen && (

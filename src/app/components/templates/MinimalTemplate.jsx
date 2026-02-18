@@ -144,21 +144,49 @@ const MinimalTemplate = ({ data, accentColor = "#2563eb" }) => {
           </SortableItem>
         );
 
-      case "skills":
-        return (
-          <SortableItem key={key} index={i} total={leftSections.length}
-            onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
-            onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
-          >
-            <section style={styles.block}>
-              <h2 style={styles.h2}>SKILLS</h2>
-              <div style={styles.tags}>
-                {[...(data.skills?.technicalSkills || []), ...(data.skills?.softSkills || [])]
-                  .map((s, idx) => <span key={idx} style={styles.tag}>{s}</span>)}
-              </div>
-            </section>
-          </SortableItem>
-        );
+case "skills":
+  return (
+    <SortableItem
+      key={key}
+      index={i}
+      total={leftSections.length}
+      onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
+      onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
+    >
+      <section style={styles.block}>
+        <h2 style={styles.h2}>SKILLS</h2>
+
+        {/* Technical Skills */}
+        {data.skills?.technicalSkills?.length > 0 && (
+          <div style={{ marginBottom: "0.5rem" }}>
+            <strong style={{ fontSize: "12px" }}>Technical Skills</strong>
+            <ul style={{ paddingLeft: "16px", marginTop: "4px" }}>
+              {data.skills.technicalSkills.map((skill, idx) => (
+                <li key={idx} style={styles.textSm}>
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Soft Skills */}
+        {data.skills?.softSkills?.length > 0 && (
+          <div>
+            <strong style={{ fontSize: "12px" }}>Soft Skills</strong>
+            <ul style={{ paddingLeft: "16px", marginTop: "4px" }}>
+              {data.skills.softSkills.map((skill, idx) => (
+                <li key={idx} style={styles.textSm}>
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    </SortableItem>
+  );
+
 
       case "languages":
         return (

@@ -58,6 +58,9 @@ const ModernTemplate = ({
   accentColor = "#3B82F6",
   sectionTypographies = {},
 }) => {
+
+  const hasItems = (arr) => Array.isArray(arr) && arr.length > 0;
+
   /* ---------- Section Order ---------- */
   const initialSections = useMemo(() => {
     const base = [
@@ -65,11 +68,13 @@ const ModernTemplate = ({
       "experience",
       "projects",
       "education",
-      "skills",
+      "technical_skills",
+      "soft_skills",
       "participations",
       "achievements",
       "languages",
     ];
+
     const custom =
       data?.custom_sections?.map((_, i) => `custom_${i}`) || [];
     return [...base, ...custom];
@@ -85,7 +90,6 @@ const ModernTemplate = ({
     setSections(copy);
   };
 
-  /* ---------- Typography ---------- */
   const baseTypography = {
     header: { fontFamily: "Inter, sans-serif", fontSize: 14, lineHeight: 1.5 },
   };
@@ -121,12 +125,6 @@ const ModernTemplate = ({
         marginBottom: "0.6rem",
       },
       between: { display: "flex", justifyContent: "space-between" },
-      tag: {
-        background: "#f3f4f6",
-        borderRadius: "4px",
-        padding: "2px 6px",
-        fontSize: b * 0.75,
-      },
       header: {
         textAlign: "center",
         borderBottom: "1px solid #e5e7eb",
@@ -148,13 +146,14 @@ const ModernTemplate = ({
     };
   };
 
-  /* ---------- Render Section ---------- */
   const renderSection = (key, index) => {
     const s = styles(key);
 
     switch (key) {
+
       case "professional_summary":
-        return data.professional_summary && (
+        if (!data.professional_summary) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
@@ -167,7 +166,8 @@ const ModernTemplate = ({
         );
 
       case "experience":
-        return data.experience?.length && (
+        if (!hasItems(data.experience)) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
@@ -191,7 +191,8 @@ const ModernTemplate = ({
         );
 
       case "projects":
-        return data.projects?.length && (
+        if (!hasItems(data.projects)) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
@@ -210,7 +211,8 @@ const ModernTemplate = ({
         );
 
       case "education":
-        return data.education?.length && (
+        if (!hasItems(data.education)) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
@@ -228,24 +230,39 @@ const ModernTemplate = ({
           </SortableItem>
         );
 
-      case "skills":
-        return data.skills && (
-          <SortableItem key={key} index={index} total={sections.length}
-            onMoveUp={() => moveSection(index, "up")}
-            onMoveDown={() => moveSection(index, "down")}
-          >
+      case "technical_skills":
+        if (!hasItems(data.skills?.technicalSkills)) return null;
+        return (
+          <SortableItem key={key} index={index} total={sections.length}>
             <section style={s.section}>
-              <h2 style={s.h2}>SKILLS</h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                {[...(data.skills.technicalSkills || []), ...(data.skills.softSkills || [])]
-                  .map((sk, i) => <span key={i} style={s.tag}>{sk}</span>)}
-              </div>
+              <h2 style={s.h2}>TECHNICAL SKILLS</h2>
+              <ul style={{ paddingLeft: "18px" }}>
+                {data.skills.technicalSkills.map((skill, i) => (
+                  <li key={i} style={s.textSm}>{skill}</li>
+                ))}
+              </ul>
+            </section>
+          </SortableItem>
+        );
+
+      case "soft_skills":
+        if (!hasItems(data.skills?.softSkills)) return null;
+        return (
+          <SortableItem key={key} index={index} total={sections.length}>
+            <section style={s.section}>
+              <h2 style={s.h2}>SOFT SKILLS</h2>
+              <ul style={{ paddingLeft: "18px" }}>
+                {data.skills.softSkills.map((skill, i) => (
+                  <li key={i} style={s.textSm}>{skill}</li>
+                ))}
+              </ul>
             </section>
           </SortableItem>
         );
 
       case "languages":
-        return data.languages?.length && (
+        if (!hasItems(data.languages)) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}>
             <section style={s.section}>
               <h2 style={s.h2}>LANGUAGES</h2>
@@ -259,7 +276,8 @@ const ModernTemplate = ({
         );
 
       case "participations":
-        return data.participations?.length && (
+        if (!hasItems(data.participations)) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}>
             <section style={s.section}>
               <h2 style={s.h2}>PARTICIPATIONS</h2>
@@ -275,7 +293,8 @@ const ModernTemplate = ({
         );
 
       case "achievements":
-        return data.achievements?.length && (
+        if (!hasItems(data.achievements)) return null;
+        return (
           <SortableItem key={key} index={index} total={sections.length}>
             <section style={s.section}>
               <h2 style={s.h2}>ACHIEVEMENTS</h2>
@@ -293,7 +312,7 @@ const ModernTemplate = ({
         if (key.startsWith("custom_")) {
           const i = Number(key.split("_")[1]);
           const cs = data.custom_sections?.[i];
-          if (!cs) return null;
+          if (!cs || !hasItems(cs.items)) return null;
 
           return (
             <SortableItem key={key} index={index} total={sections.length}>

@@ -301,12 +301,7 @@ const ResumeBuilder = () => {
                       setResumeData(prev => ({ ...prev, template }))
                     }
                   />
-                  <ColorPicker
-                    selectedColor={resumeData.accent_color}
-                    onChange={color =>
-                      setResumeData(prev => ({ ...prev, accent_color: color }))
-                    }
-                  />
+
                   {/* <TypographySettings
                     sectionTypographies={sectionTypographies}
                     selectedSection={selectedTypographySection}
@@ -353,15 +348,24 @@ const ResumeBuilder = () => {
               {/* Typography Settings Panel */}
               {showTypographySettings && (
                 <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <TypographySettings
-                    sectionTypographies={sectionTypographies}
-                    selectedSection={selectedTypographySection}
-                    onUpdateTypography={updateTypography}
-                    onSelectSection={setSelectedTypographySection}
-                    onClose={() => setShowTypographySettings(false)}
-                  />
+                  <div className="flex flex-row gap-4">
+                    <TypographySettings
+                      sectionTypographies={sectionTypographies}
+                      selectedSection={selectedTypographySection}
+                      onUpdateTypography={updateTypography}
+                      onSelectSection={setSelectedTypographySection}
+                    // onClose={() => setShowTypographySettings(false)}
+                    />
+                    <ColorPicker
+                      selectedColor={resumeData.accent_color}
+                      onChange={color =>
+                        setResumeData(prev => ({ ...prev, accent_color: color }))
+                      }
+                    />
+                  </div>
                 </div>
               )}
+
 
               {/* Form Content */}
               {activeSection.id === 'personal' && (
