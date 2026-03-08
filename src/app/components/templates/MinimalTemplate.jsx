@@ -52,7 +52,7 @@ const btn = {
 /* =========================
    Minimal Resume Template
 ========================= */
-const MinimalTemplate = ({ data, accentColor = "#2563eb" }) => {
+const MinimalTemplate = ({ data, accentColor = "#2563eb", sectionTypographies = {} }) => {
   const [leftSections, setLeftSections] = useState([
     "contact",
     "skills",
@@ -77,55 +77,71 @@ const MinimalTemplate = ({ data, accentColor = "#2563eb" }) => {
     setList(copy);
   };
 
-  const styles = {
-    page: {
-      width: "210mm",
-      minHeight: "297mm",
-      display: "flex",
-      fontFamily: "Inter, sans-serif",
-      background: "#fff",
-    },
-    left: {
-      width: "30%",
-      padding: "1.5rem",
-      background: "#f3f4f6",
-    },
-    right: {
-      width: "70%",
-      padding: "1.8rem",
-    },
-    h2: {
-      fontSize: "14px",
-      fontWeight: 600,
-      color: accentColor,
-      borderBottom: `1px solid ${accentColor}`,
-      marginBottom: "0.5rem",
-    },
-    block: { marginBottom: "1rem" },
-    textSm: { fontSize: "12px" },
-    textXs: { fontSize: "11px", color: "#6b7280" },
-    tag: {
-      background: "#e5e7eb",
-      borderRadius: "4px",
-      padding: "2px 6px",
-      fontSize: "11px",
-    },
-    tags: { display: "flex", flexWrap: "wrap", gap: "4px" },
-    borderL: {
-      borderLeft: `2px solid ${accentColor}`,
-      paddingLeft: "0.5rem",
-      marginBottom: "0.6rem",
-    },
-    name: {
-      fontSize: "26px",
-      fontWeight: "bold",
-      color: accentColor,
-      marginBottom: "1rem",
-    },
+  const baseTypography = {
+    header: { fontFamily: "Inter, sans-serif", fontSize: 14, lineHeight: 1.5 },
   };
+
+  const merged = { ...baseTypography, ...sectionTypographies };
+
+  const getStyles = (key) => {
+    const t = merged[key] || merged.header;
+    const b = t.fontSize;
+
+    return {
+      page: {
+        width: "210mm",
+        minHeight: "297mm",
+        display: "flex",
+        fontFamily: t.fontFamily,
+        background: "#fff",
+      },
+      left: {
+        width: "30%",
+        padding: "1.5rem",
+        background: "#f3f4f6",
+        fontFamily: t.fontFamily,
+      },
+      right: {
+        width: "70%",
+        padding: "1.8rem",
+        fontFamily: t.fontFamily,
+      },
+      h2: {
+        fontSize: b * 1,
+        fontWeight: 600,
+        color: accentColor,
+        borderBottom: `1px solid ${accentColor}`,
+        marginBottom: "0.5rem",
+      },
+      block: { marginBottom: "1rem", fontFamily: t.fontFamily },
+      textSm: { fontSize: b * 0.875 },
+      textXs: { fontSize: b * 0.8, color: "#6b7280" },
+      tag: {
+        background: "#e5e7eb",
+        borderRadius: "4px",
+        padding: "2px 6px",
+        fontSize: b * 0.8,
+      },
+      tags: { display: "flex", flexWrap: "wrap", gap: "4px" },
+      borderL: {
+        borderLeft: `2px solid ${accentColor}`,
+        paddingLeft: "0.5rem",
+        marginBottom: "0.6rem",
+      },
+      name: {
+        fontSize: b * 1.85,
+        fontWeight: "bold",
+        color: accentColor,
+        marginBottom: "1rem",
+      },
+    };
+  };
+
+  const styles = getStyles("header");
 
   /* ---------- LEFT ---------- */
   const renderLeft = (key, i) => {
+    const s = getStyles(key === "skills" ? "skills" : key);
     switch (key) {
       case "contact":
         return (
@@ -133,13 +149,13 @@ const MinimalTemplate = ({ data, accentColor = "#2563eb" }) => {
             onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
             onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
           >
-            <section style={styles.block}>
-              <h2 style={styles.h2}>CONTACT</h2>
-              {data.personal_info?.email && <div style={styles.textSm}><Mail size={12}/> {data.personal_info.email}</div>}
-              {data.personal_info?.phone && <div style={styles.textSm}><Phone size={12}/> {data.personal_info.phone}</div>}
-              {data.personal_info?.location && <div style={styles.textSm}><MapPin size={12}/> {data.personal_info.location}</div>}
-              {data.personal_info?.linkedin && <div style={styles.textSm}><Linkedin size={12}/> {data.personal_info.linkedin}</div>}
-              {data.personal_info?.website && <div style={styles.textSm}><Globe size={12}/> {data.personal_info.website}</div>}
+            <section style={s.block}>
+              <h2 style={s.h2}>CONTACT</h2>
+              {data.personal_info?.email && <div style={s.textSm}><Mail size={12}/> {data.personal_info.email}</div>}
+              {data.personal_info?.phone && <div style={s.textSm}><Phone size={12}/> {data.personal_info.phone}</div>}
+              {data.personal_info?.location && <div style={s.textSm}><MapPin size={12}/> {data.personal_info.location}</div>}
+              {data.personal_info?.linkedin && <div style={s.textSm}><Linkedin size={12}/> {data.personal_info.linkedin}</div>}
+              {data.personal_info?.website && <div style={s.textSm}><Globe size={12}/> {data.personal_info.website}</div>}
             </section>
           </SortableItem>
         );
@@ -153,16 +169,16 @@ case "skills":
       onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
       onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
     >
-      <section style={styles.block}>
-        <h2 style={styles.h2}>SKILLS</h2>
+      <section style={s.block}>
+        <h2 style={s.h2}>SKILLS</h2>
 
         {/* Technical Skills */}
         {data.skills?.technicalSkills?.length > 0 && (
           <div style={{ marginBottom: "0.5rem" }}>
-            <strong style={{ fontSize: "12px" }}>Technical Skills</strong>
+            <strong style={{ fontSize: s.textSm.fontSize }}>Technical Skills</strong>
             <ul style={{ paddingLeft: "16px", marginTop: "4px" }}>
               {data.skills.technicalSkills.map((skill, idx) => (
-                <li key={idx} style={styles.textSm}>
+                <li key={idx} style={s.textSm}>
                   {skill}
                 </li>
               ))}
@@ -173,10 +189,10 @@ case "skills":
         {/* Soft Skills */}
         {data.skills?.softSkills?.length > 0 && (
           <div>
-            <strong style={{ fontSize: "12px" }}>Soft Skills</strong>
+            <strong style={{ fontSize: s.textSm.fontSize }}>Soft Skills</strong>
             <ul style={{ paddingLeft: "16px", marginTop: "4px" }}>
               {data.skills.softSkills.map((skill, idx) => (
-                <li key={idx} style={styles.textSm}>
+                <li key={idx} style={s.textSm}>
                   {skill}
                 </li>
               ))}
@@ -194,10 +210,10 @@ case "skills":
             onMoveUp={() => move(leftSections, setLeftSections, i, "up")}
             onMoveDown={() => move(leftSections, setLeftSections, i, "down")}
           >
-            <section style={styles.block}>
-              <h2 style={styles.h2}>LANGUAGES</h2>
+            <section style={s.block}>
+              <h2 style={s.h2}>LANGUAGES</h2>
               {data.languages?.map((l, idx) => (
-                <div key={idx} style={styles.textSm}>
+                <div key={idx} style={s.textSm}>
                   {l.language} {l.proficiency && `(${l.proficiency})`}
                 </div>
               ))}
@@ -212,6 +228,7 @@ case "skills":
 
   /* ---------- RIGHT ---------- */
   const renderRight = (key, i) => {
+    const s = getStyles(key);
     switch (key) {
       case "professional_summary":
         return data.professional_summary && (

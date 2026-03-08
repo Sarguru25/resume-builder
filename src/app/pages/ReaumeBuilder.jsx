@@ -4,7 +4,7 @@ import { ArrowLeftIcon, User, FileText, Briefcase, GraduationCap, ChevronLeft, F
 import PersonalInfoForm from '../components/form/PersonalInfoForm'
 import TemplateSecector from '../components/TemplateSecector'
 import ResumePreview from '../components/ResumePreview'
-import ColorPicker from '../components/ColorPicker'
+import ColorPicker from '../components/left-panel/ColorPicker'
 import ProfessionalSummary from '../components/form/ProfessionalSummary'
 import ExperienceForm from '../components/form/ExperienceForm'
 import EducationForm from '../components/form/EducationForm'

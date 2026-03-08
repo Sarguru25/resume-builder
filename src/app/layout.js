@@ -1,7 +1,7 @@
 'use client'
 import './globals.css'
 import { Provider } from 'react-redux'
-import { store } from '@/app/store'
+import { store } from './store'
 import { Toaster } from 'react-hot-toast'
 import AuthProvider from './AuthProvider'
 

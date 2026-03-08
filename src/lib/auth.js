@@ -1,8 +1,8 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import User from "@/lib/models/User";
-import { connectDB } from "@/lib/db";
+import User from "./models/User";
+import { connectDB } from "./db";
 import { getServerSession } from "next-auth";
 
 /* =========================
@@ -111,3 +111,4 @@ export async function protect() {
 
   return session.user.id;
 }
+  

@@ -58,7 +58,6 @@ const ModernTemplate = ({
   accentColor = "#3B82F6",
   sectionTypographies = {},
 }) => {
-
   const hasItems = (arr) => Array.isArray(arr) && arr.length > 0;
 
   /* ---------- Section Order ---------- */
@@ -75,8 +74,7 @@ const ModernTemplate = ({
       "languages",
     ];
 
-    const custom =
-      data?.custom_sections?.map((_, i) => `custom_${i}`) || [];
+    const custom = data?.custom_sections?.map((_, i) => `custom_${i}`) || [];
     return [...base, ...custom];
   }, [data?.custom_sections]);
 
@@ -97,7 +95,8 @@ const ModernTemplate = ({
   const merged = { ...baseTypography, ...sectionTypographies };
 
   const styles = (key) => {
-    const t = merged[key] || merged.header;
+    // FIX: Merge section‑specific settings with header defaults
+    const t = { ...merged.header, ...merged[key] };
     const b = t.fontSize;
 
     return {
@@ -110,7 +109,13 @@ const ModernTemplate = ({
         color: "#1f2937",
         fontFamily: t.fontFamily,
       },
-      section: { marginBottom: "1rem", fontSize: b, lineHeight: t.lineHeight },
+      section: {
+        marginBottom: "1rem",
+        fontSize: b,
+        lineHeight: t.lineHeight,
+        fontFamily: t.fontFamily,
+      },
+      debugFont: t.fontFamily,
       h2: {
         fontSize: b * 1.25,
         fontWeight: 600,
@@ -147,18 +152,23 @@ const ModernTemplate = ({
   };
 
   const renderSection = (key, index) => {
-    const s = styles(key);
+    // Map internal keys to typography keys
+    const typographyKey =
+      key === "technical_skills" || key === "soft_skills" ? "skills" : key;
+    const s = styles(typographyKey);
 
     switch (key) {
-
       case "professional_summary":
         if (!data.professional_summary) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
           >
-            <section style={s.section}>
+            <section style={s.section} data-font={s.debugFont}>
               <h2 style={s.h2}>PROFESSIONAL SUMMARY</h2>
               <p style={s.textSm}>{data.professional_summary}</p>
             </section>
@@ -168,7 +178,10 @@ const ModernTemplate = ({
       case "experience":
         if (!hasItems(data.experience)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
           >
@@ -193,7 +206,10 @@ const ModernTemplate = ({
       case "projects":
         if (!hasItems(data.projects)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
           >
@@ -213,7 +229,10 @@ const ModernTemplate = ({
       case "education":
         if (!hasItems(data.education)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
           >
@@ -221,7 +240,10 @@ const ModernTemplate = ({
               <h2 style={s.h2}>EDUCATION</h2>
               {data.education.map((e, i) => (
                 <div key={i} style={s.borderL}>
-                  <strong>{e.degree}{e.field && ` in ${e.field}`}</strong>
+                  <strong>
+                    {e.degree}
+                    {e.field && ` in ${e.field}`}
+                  </strong>
                   <div style={s.textXs}>{e.institution}</div>
                   {e.gpa && <div style={s.textXs}>GPA: {e.gpa}</div>}
                 </div>
@@ -233,12 +255,20 @@ const ModernTemplate = ({
       case "technical_skills":
         if (!hasItems(data.skills?.technicalSkills)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}>
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
+            onMoveUp={() => moveSection(index, "up")}
+            onMoveDown={() => moveSection(index, "down")}
+          >
             <section style={s.section}>
               <h2 style={s.h2}>TECHNICAL SKILLS</h2>
               <ul style={{ paddingLeft: "18px" }}>
                 {data.skills.technicalSkills.map((skill, i) => (
-                  <li key={i} style={s.textSm}>{skill}</li>
+                  <li key={i} style={s.textSm}>
+                    {skill}
+                  </li>
                 ))}
               </ul>
             </section>
@@ -248,12 +278,20 @@ const ModernTemplate = ({
       case "soft_skills":
         if (!hasItems(data.skills?.softSkills)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}>
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
+            onMoveUp={() => moveSection(index, "up")}
+            onMoveDown={() => moveSection(index, "down")}
+          >
             <section style={s.section}>
               <h2 style={s.h2}>SOFT SKILLS</h2>
               <ul style={{ paddingLeft: "18px" }}>
                 {data.skills.softSkills.map((skill, i) => (
-                  <li key={i} style={s.textSm}>{skill}</li>
+                  <li key={i} style={s.textSm}>
+                    {skill}
+                  </li>
                 ))}
               </ul>
             </section>
@@ -263,7 +301,13 @@ const ModernTemplate = ({
       case "languages":
         if (!hasItems(data.languages)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}>
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
+            onMoveUp={() => moveSection(index, "up")}
+            onMoveDown={() => moveSection(index, "down")}
+          >
             <section style={s.section}>
               <h2 style={s.h2}>LANGUAGES</h2>
               {data.languages.map((l, i) => (
@@ -278,7 +322,13 @@ const ModernTemplate = ({
       case "participations":
         if (!hasItems(data.participations)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}>
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
+            onMoveUp={() => moveSection(index, "up")}
+            onMoveDown={() => moveSection(index, "down")}
+          >
             <section style={s.section}>
               <h2 style={s.h2}>PARTICIPATIONS</h2>
               {data.participations.map((p, i) => (
@@ -295,7 +345,13 @@ const ModernTemplate = ({
       case "achievements":
         if (!hasItems(data.achievements)) return null;
         return (
-          <SortableItem key={key} index={index} total={sections.length}>
+          <SortableItem
+            key={key}
+            index={index}
+            total={sections.length}
+            onMoveUp={() => moveSection(index, "up")}
+            onMoveDown={() => moveSection(index, "down")}
+          >
             <section style={s.section}>
               <h2 style={s.h2}>ACHIEVEMENTS</h2>
               {data.achievements.map((a, i) => (
@@ -315,7 +371,13 @@ const ModernTemplate = ({
           if (!cs || !hasItems(cs.items)) return null;
 
           return (
-            <SortableItem key={key} index={index} total={sections.length}>
+            <SortableItem
+              key={key}
+              index={index}
+              total={sections.length}
+              onMoveUp={() => moveSection(index, "up")}
+              onMoveDown={() => moveSection(index, "down")}
+            >
               <section style={s.section}>
                 <h2 style={s.h2}>{cs.section_title}</h2>
                 {cs.items.map((it, idx) => (
@@ -339,11 +401,31 @@ const ModernTemplate = ({
       <header style={h.header}>
         <div style={h.name}>{data.personal_info?.full_name}</div>
         <div style={h.headerRow}>
-          {data.personal_info?.email && <><Mail size={14}/> {data.personal_info.email}</>}
-          {data.personal_info?.phone && <><Phone size={14}/> {data.personal_info.phone}</>}
-          {data.personal_info?.location && <><MapPin size={14}/> {data.personal_info.location}</>}
-          {data.personal_info?.linkedin && <><Linkedin size={14}/> {data.personal_info.linkedin}</>}
-          {data.personal_info?.website && <><Globe size={14}/> {data.personal_info.website}</>}
+          {data.personal_info?.email && (
+            <>
+              <Mail size={14} /> {data.personal_info.email}
+            </>
+          )}
+          {data.personal_info?.phone && (
+            <>
+              <Phone size={14} /> {data.personal_info.phone}
+            </>
+          )}
+          {data.personal_info?.location && (
+            <>
+              <MapPin size={14} /> {data.personal_info.location}
+            </>
+          )}
+          {data.personal_info?.linkedin && (
+            <>
+              <Linkedin size={14} /> {data.personal_info.linkedin}
+            </>
+          )}
+          {data.personal_info?.website && (
+            <>
+              <Globe size={14} /> {data.personal_info.website}
+            </>
+          )}
         </div>
       </header>
 

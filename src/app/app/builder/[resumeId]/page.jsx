@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import toast from 'react-hot-toast'
+import LeftPanel from '@/app/components/left-panel/LeftPanel'
 
 import {
   ArrowLeftIcon,
@@ -18,35 +19,38 @@ import {
   Languages,
   Users,
   LayoutGrid,
-  ChevronLeft,
-  ChevronRight,
   Share2Icon,
   DownloadIcon,
   EyeIcon,
   EyeOffIcon,
-  TypeIcon,
-  EditIcon, // Add this import
+  LayoutTemplate,
+  Shapes,
+  Crown,
+  UploadCloud,
+  Wrench,
+  Folder,
+  TextCursorInput,
+  Type,
+  BotMessageSquare,
+  SearchCheck,
+  // Sparkles,
 } from 'lucide-react'
 
-import PersonalInfoForm from '@/app/components/form/PersonalInfoForm'
-import ProfessionalSummary from '@/app/components/form/ProfessionalSummary'
-import ExperienceForm from '@/app/components/form/ExperienceForm'
-import EducationForm from '@/app/components/form/EducationForm'
-import ProjectForm from '@/app/components/form/ProjectForm'
-import SkillForm from '@/app/components/form/SkillForm'
-import ParticipationForm from '@/app/components/form/ParticipationsForm'
-import AchievementsForm from '@/app/components/form/AchievementsForm'
-import LanguagesKnown from '@/app/components/form/LanguagesKnown'
-import CustomForm from '@/app/components/form/CustomForm'
+import AIChatAssistant from "@/app/components/left-panel/AIChatAssistant"
 
-import TemplateSecector from '@/app/components/TemplateSecector'
+import ATSChecker from "@/app/components/left-panel/ATSChecker";
+// import AIChatAssistant from "@/app/components/AIChatAssistant";
+
+import TemplateSelector from '@/app/components/left-panel/TemplateSelector'
 import ResumePreview from '@/app/components/ResumePreview'
-import ColorPicker from '@/app/components/ColorPicker'
-import TypographySettings from '@/app/components/TypographySettings' // Import the new component
+import ColorPicker from '@/app/components/left-panel/ColorPicker'
+import TypographySettings from '@/app/components/left-panel/TypographySettings' // Import the new component
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams()
   const { data: session, status } = useSession()
+  const [active, setActive] = useState("templates");
+
 
   const [resumeData, setResumeData] = useState({
     title: '',
@@ -144,6 +148,8 @@ const ResumeBuilder = () => {
     }));
   };
 
+
+
   /* ---------------- LOAD RESUME ---------------- */
   useEffect(() => {
     if (!resumeId || status !== 'authenticated') return
@@ -204,6 +210,7 @@ const ResumeBuilder = () => {
     }
   }
 
+
   /* ---------------- PUBLIC / PRIVATE ---------------- */
   const togglePublic = async () => {
     try {
@@ -261,6 +268,117 @@ const ResumeBuilder = () => {
       toast.error(err.message);
     }
   };
+// const resumeId = params.id;
+  const menuItems = [
+    { id: "text", label: "Input", icon: TextCursorInput },
+    { id: "templates", label: "Templates", icon: LayoutTemplate },
+    { id: "typography", label: "Typography", icon: Type },
+    { id: "ai", label: "AI", icon: BotMessageSquare },
+    { id: "ats", label: "ATS", icon: SearchCheck },
+    { id: "projects", label: "Projects", icon: Folder },
+    { id: "tools", label: "Tools", icon: Wrench },
+    // { id: "apps", label: "Apps", icon: Grid },
+    // { id: "magic", label: "Magic Media", icon: Sparkles },
+  ];
+  /// RENDER LEFT PANEL BASED ON ACTIVE MENU
+  const renderLeftContent = () => {
+    switch (active) {
+      case "text":
+        return (
+          <LeftPanel
+            resumeData={resumeData}
+            setResumeData={setResumeData}
+            activeSection={activeSection}
+            activeSectionIndex={activeSectionIndex}
+            setActiveSectionIndex={setActiveSectionIndex}
+            sections={sections}
+            removeBackground={removeBackground}
+            setRemoveBackground={setRemoveBackground}
+            showTypographySettings={showTypographySettings}
+            setShowTypographySettings={setShowTypographySettings}
+            sectionTypographies={sectionTypographies}
+            selectedTypographySection={selectedTypographySection}
+            setSelectedTypographySection={setSelectedTypographySection}
+            updateTypography={updateTypography}
+            saveResume={saveResume}
+            toast={toast}
+          />
+        );
+
+           case "ats":
+      return (
+        <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-max p-6">
+          <ATSChecker resumeId={resumeId} />
+        </div>
+      );
+
+      case "templates":
+        return (
+          <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-max p-6">
+            <TemplateSelector
+              panel={true}
+              selectedTemplate={resumeData.template}
+              onChange={(template) =>
+                setResumeData(prev => ({
+                  ...prev,
+                  template
+                }))
+              }
+            />
+          </div>
+        )
+      case "typography":
+        return (
+          <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-max p-6 flex flex-col gap-4">
+            <TypographySettings
+              sectionTypographies={sectionTypographies}
+              selectedSection={selectedTypographySection}
+              onUpdateTypography={updateTypography}
+              onSelectSection={setSelectedTypographySection}
+            />
+
+            <ColorPicker
+              selectedColor={resumeData.accent_color}
+              onChange={(color) =>
+                setResumeData(prev => ({
+                  ...prev,
+                  accent_color: color
+                }))
+              }
+            />
+          </div>
+        );
+
+            case "text":
+      return (
+        <LeftPanel
+          resumeData={resumeData}
+          setResumeData={setResumeData}
+          activeSection={activeSection}
+          activeSectionIndex={activeSectionIndex}
+          setActiveSectionIndex={setActiveSectionIndex}
+          sections={sections}
+        />
+      )
+
+           case "ai":
+      return (
+        <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-[55%] p-6">
+        <AIChatAssistant
+          resumeData={resumeData}
+          setResumeData={setResumeData}
+        />
+      </div>
+      )
+
+      default:
+        return (
+          <div className="lg:col-span-5 bg-white rounded-lg shadow-sm  p-6 flex items-center justify-center h-[55%] text-gray-400">
+            Feature Coming Soon
+          </div>
+        );
+    }
+  };
 
 
   /* ---------------- AUTH GUARD ---------------- */
@@ -277,184 +395,43 @@ const ResumeBuilder = () => {
           <ArrowLeftIcon className="size-4" /> Back to Dashboard
         </Link>
       </div>
+      {/* <Sidebar /> */}
+
+      <aside className="absolute fixed left-0 rounded rounded-tr-2xl rounded-br-2xl w-19 bg-green-300 text-black flex flex-col items-center py-6 hover:left-0 transition-all duration-300">
+        <div className="flex flex-col gap-6 w-full">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = active === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActive(item.id)}
+                className={`flex flex-col items-center gap-1 py-2 w-full transition-all duration-200 hover:scale-110 rounded-lg
+                ${isActive
+                    ? "text-white bg-green-500 scale-115"
+                    : "hover:bg-green-500 hover:text-white scale-110 transition-all duration-200"
+                  }
+              `}
+              >
+                <Icon
+                  size={22}
+                  className={isActive ? "text-white scale-110 transition-all duration-200" : ""}
+                />
+                <span className="text-xs">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </aside>
+
 
       <div className="max-w-7xl mx-auto px-4 pb-8">
         <div className="grid lg:grid-cols-12 gap-8">
           {/* LEFT PANEL */}
-          <div className="relative lg:col-span-5 rounded-lg overflow-hidden">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 pt-1">
-              {/* Progress bar */}
-              <hr className="absolute top-0 left-0 right-0 border-2 border-gray-200" />
-              <hr
-                className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-200"
-                style={{
-                  width: `${(activeSectionIndex * 100) / (sections.length - 1)}%`,
-                }}
-              />
 
-              {/* Section Navigation */}
-              <div className="flex justify-between items-center mb-6 border-b border-gray-300 py-1">
-                <div className="flex items-center gap-2">
-                  <TemplateSecector
-                    selectedTemplate={resumeData.template}
-                    onChange={template =>
-                      setResumeData(prev => ({ ...prev, template }))
-                    }
-                  />
+          {renderLeftContent()}
 
-                  {/* <TypographySettings
-                    sectionTypographies={sectionTypographies}
-                    selectedSection={selectedTypographySection}
-                    onUpdateTypography={updateTypography}
-                    onSelectSection={setSelectedTypographySection}
-                  /> */}
-
-                  <button
-                    onClick={() => setShowTypographySettings(!showTypographySettings)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                  >
-                    <EditIcon className="size-4" />
-                    Edit
-                  </button>
-                </div>
-
-                <div className="flex items-center">
-                  {activeSectionIndex !== 0 && (
-                    <button
-                      onClick={() =>
-                        setActiveSectionIndex(i => Math.max(i - 1, 0))
-                      }
-                      className="flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
-                    >
-                      <ChevronLeft className="size-4" /> Previous
-                    </button>
-                  )}
-                  <button
-                    onClick={() =>
-                      setActiveSectionIndex(i =>
-                        Math.min(i + 1, sections.length - 1)
-                      )
-                    }
-                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 &&
-                      'opacity-50'
-                      }`}
-                    disabled={activeSectionIndex === sections.length - 1}
-                  >
-                    Next <ChevronRight className="size-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Typography Settings Panel */}
-              {showTypographySettings && (
-                <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <div className="flex flex-row gap-4">
-                    <TypographySettings
-                      sectionTypographies={sectionTypographies}
-                      selectedSection={selectedTypographySection}
-                      onUpdateTypography={updateTypography}
-                      onSelectSection={setSelectedTypographySection}
-                    // onClose={() => setShowTypographySettings(false)}
-                    />
-                    <ColorPicker
-                      selectedColor={resumeData.accent_color}
-                      onChange={color =>
-                        setResumeData(prev => ({ ...prev, accent_color: color }))
-                      }
-                    />
-                  </div>
-                </div>
-              )}
-
-
-              {/* Form Content */}
-              {activeSection.id === 'personal' && (
-                <PersonalInfoForm
-                  data={resumeData.personal_info}
-                  onChange={d => setResumeData(p => ({ ...p, personal_info: d }))}
-                  removeBackground={removeBackground}
-                  setRemoveBackground={setRemoveBackground}
-                />
-              )}
-
-              {activeSection.id === 'summary' && (
-                <ProfessionalSummary
-                  data={resumeData.professional_summary}
-                  onChange={(value) => setResumeData(prev => ({ ...prev, professional_summary: value }))}
-                  setResumeData={setResumeData}
-                />
-              )}
-
-              {activeSection.id === 'experience' && (
-                <ExperienceForm
-                  data={resumeData.experience}
-                  onChange={d => setResumeData(p => ({ ...p, experience: d }))}
-                />
-              )}
-
-              {activeSection.id === 'education' && (
-                <EducationForm
-                  data={resumeData.education}
-                  onChange={d => setResumeData(p => ({ ...p, education: d }))}
-                />
-              )}
-
-              {activeSection.id === 'projects' && (
-                <ProjectForm
-                  data={resumeData.projects}
-                  onChange={d => setResumeData(p => ({ ...p, projects: d }))}
-                />
-              )}
-
-              {activeSection.id === 'skills' && (
-                <SkillForm
-                  data={resumeData.skills}
-                  onChange={d => setResumeData(p => ({ ...p, skills: d }))}
-                />
-              )}
-
-              {activeSection.id === 'participations' && (
-                <ParticipationForm
-                  data={resumeData.participations}
-                  onChange={d => setResumeData(p => ({ ...p, participations: d }))}
-                />
-              )}
-
-              {activeSection.id === 'achievements' && (
-                <AchievementsForm
-                  data={resumeData.achievements}
-                  onChange={d => setResumeData(p => ({ ...p, achievements: d }))}
-                />
-              )}
-
-              {activeSection.id === 'languages' && (
-                <LanguagesKnown
-                  data={resumeData.languages}
-                  onChange={d => setResumeData(p => ({ ...p, languages: d }))}
-                />
-              )}
-
-              {activeSection.id === 'custom' && (
-                <CustomForm
-                  data={resumeData.custom_sections}
-                  onChange={d => setResumeData(p => ({ ...p, custom_sections: d }))}
-                />
-              )}
-
-              <button
-                onClick={() =>
-                  toast.promise(saveResume(), {
-                    loading: 'Saving...',
-                    success: 'Resume saved successfully',
-                    error: 'Failed to save resume',
-                  })
-                }
-                className="bg-gradient-to-br from-green-100 to-green-200 ring-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
 
           {/* RIGHT PANEL */}
           <div className="lg:col-span-7 max-lg:mt-6">
@@ -493,7 +470,7 @@ const ResumeBuilder = () => {
               data={resumeData}
               template={resumeData.template}
               accentColor={resumeData.accent_color}
-              sectionTypographies={sectionTypographies} // Pass typography to preview
+              sectionTypographies={sectionTypographies}
             />
           </div>
         </div>
