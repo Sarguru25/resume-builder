@@ -47,7 +47,6 @@ Do not wrap in markdown.
     const parsed = JSON.parse(text)
 
     return NextResponse.json(parsed)
-    console.log("AI RAW RESPONSE:", text)
 
   } catch (error) {
 
@@ -61,3 +60,80 @@ Do not wrap in markdown.
   }
 
 }
+
+
+
+
+
+
+
+
+// import { NextResponse } from "next/server"
+
+// export async function POST(req) {
+
+//   try {
+
+//     const { message, resumeData } = await req.json()
+
+//     const prompt = `
+// You are an AI resume editor.
+
+// User instruction:
+// ${message}
+
+// Current resume JSON:
+// ${JSON.stringify(resumeData)}
+
+// Return ONLY JSON.
+
+// Example:
+// {
+//  "action":"update",
+//  "path":"personalInfo.summary",
+//  "content":"Improved summary text"
+// }
+
+// Rules:
+// Return JSON only.
+// No explanation.
+// No markdown.
+// `
+
+//     const response = await fetch("http://localhost:11434/api/generate", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json"
+//       },
+//       body: JSON.stringify({
+//         model: "phi3",
+//         prompt: prompt,
+//         stream: false
+//       })
+//     })
+
+//     const data = await response.json()
+
+//     let text = data.response
+
+//     // Remove markdown if model adds it
+//     text = text.replace(/```json/g, "")
+//     text = text.replace(/```/g, "")
+//     text = text.trim()
+
+//     const parsed = JSON.parse(text)
+
+//     return NextResponse.json(parsed)
+
+//   } catch (error) {
+
+//     console.error("AI ERROR:", error)
+
+//     return NextResponse.json(
+//       { error: "AI response parsing failed" },
+//       { status: 500 }
+//     )
+
+//   }
+
+// }

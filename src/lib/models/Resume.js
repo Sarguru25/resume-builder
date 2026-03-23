@@ -107,7 +107,7 @@ const resumeSchema = new mongoose.Schema(
         language: { type: String },
         proficiency: {
           type: String,
-          enum: ["Basic", "Intermediate", "Fluent", "Native"],
+          enum: ["Basic", "Intermediate", "Fluent", "Native", ""],
         },
       },
     ],

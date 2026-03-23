@@ -29,6 +29,7 @@ const SortableItem = ({ index, total, onMoveUp, onMoveDown, children }) => {
           flexDirection: "column",
           gap: "4px",
           opacity: hover ? 1 : 0,
+          transition: "opacity 0.2s",
         }}
         className="print:hidden"
       >
@@ -48,10 +49,11 @@ const btnStyle = {
   fontSize: "10px",
   cursor: "pointer",
   padding: "2px 4px",
+  lineHeight: 1,
 };
 
 /* =========================
-   Modern Resume Template
+   Modern Resume Template (Enhanced)
 ========================= */
 const ModernTemplate = ({
   data,
@@ -95,14 +97,15 @@ const ModernTemplate = ({
   const merged = { ...baseTypography, ...sectionTypographies };
 
   const styles = (key) => {
-    // FIX: Merge section‑specific settings with header defaults
+    // Merge section‑specific settings with header defaults
     const t = { ...merged.header, ...merged[key] };
-    const b = t.fontSize;
+    const baseFontSize = t.fontSize;
 
     return {
       root: {
         width: "210mm",
         minHeight: "297mm",
+        boxSizing: "border-box",
         margin: "0 auto",
         padding: "2rem",
         background: "#fff",
@@ -110,43 +113,53 @@ const ModernTemplate = ({
         fontFamily: t.fontFamily,
       },
       section: {
-        marginBottom: "1rem",
-        fontSize: b,
+        marginBottom: "1.5rem", // slightly increased spacing
+        fontSize: baseFontSize,
         lineHeight: t.lineHeight,
         fontFamily: t.fontFamily,
       },
-      debugFont: t.fontFamily,
       h2: {
-        fontSize: b * 1.25,
+        fontSize: baseFontSize * 1.25,
         fontWeight: 600,
         color: accentColor,
-        marginBottom: "0.5rem",
+        marginBottom: "0.75rem",
+        letterSpacing: "0.5px",
       },
-      textSm: { fontSize: b * 0.875 },
-      textXs: { fontSize: b * 0.75, color: "#6b7280" },
+      textSm: { fontSize: baseFontSize * 0.875 },
+      textXs: { fontSize: baseFontSize * 0.75, color: "#6b7280" },
+      // Left border style (accent line)
       borderL: {
         borderLeft: `2px solid ${accentColor}`,
-        paddingLeft: "0.5rem",
+        paddingLeft: "0.75rem",
         marginBottom: "0.6rem",
+        paddingTop: "0.1rem",
+        paddingBottom: "0.1rem",
       },
       between: { display: "flex", justifyContent: "space-between" },
       header: {
         textAlign: "center",
         borderBottom: "1px solid #e5e7eb",
-        paddingBottom: "0.5rem",
-        marginBottom: "1rem",
+        paddingBottom: "1rem",
+        marginBottom: "1.5rem",
       },
       name: {
-        fontSize: b * 1.6,
+        fontSize: baseFontSize * 1.8,
         fontWeight: "bold",
         color: accentColor,
+        marginBottom: "0.5rem",
       },
       headerRow: {
         display: "flex",
         justifyContent: "center",
         flexWrap: "wrap",
-        gap: "0.5rem",
-        fontSize: b * 0.8,
+        gap: "1rem",
+        fontSize: baseFontSize * 0.8,
+        alignItems: "center",
+      },
+      contactItem: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.25rem",
       },
     };
   };
@@ -168,7 +181,7 @@ const ModernTemplate = ({
             onMoveUp={() => moveSection(index, "up")}
             onMoveDown={() => moveSection(index, "down")}
           >
-            <section style={s.section} data-font={s.debugFont}>
+            <section style={s.section}>
               <h2 style={s.h2}>PROFESSIONAL SUMMARY</h2>
               <p style={s.textSm}>{data.professional_summary}</p>
             </section>
@@ -264,13 +277,12 @@ const ModernTemplate = ({
           >
             <section style={s.section}>
               <h2 style={s.h2}>TECHNICAL SKILLS</h2>
-              <ul style={{ paddingLeft: "18px" }}>
-                {data.skills.technicalSkills.map((skill, i) => (
-                  <li key={i} style={s.textSm}>
-                    {skill}
-                  </li>
-                ))}
-              </ul>
+              {/* Each skill now gets a left border line (matching other sections) */}
+              {data.skills.technicalSkills.map((skill, i) => (
+                <div key={i} style={s.borderL}>
+                  <span style={s.textSm}>{skill}</span>
+                </div>
+              ))}
             </section>
           </SortableItem>
         );
@@ -287,13 +299,11 @@ const ModernTemplate = ({
           >
             <section style={s.section}>
               <h2 style={s.h2}>SOFT SKILLS</h2>
-              <ul style={{ paddingLeft: "18px" }}>
-                {data.skills.softSkills.map((skill, i) => (
-                  <li key={i} style={s.textSm}>
-                    {skill}
-                  </li>
-                ))}
-              </ul>
+              {data.skills.softSkills.map((skill, i) => (
+                <div key={i} style={s.borderL}>
+                  <span style={s.textSm}>{skill}</span>
+                </div>
+              ))}
             </section>
           </SortableItem>
         );
@@ -311,8 +321,10 @@ const ModernTemplate = ({
             <section style={s.section}>
               <h2 style={s.h2}>LANGUAGES</h2>
               {data.languages.map((l, i) => (
-                <div key={i} style={s.textSm}>
-                  {l.language} {l.proficiency && `(${l.proficiency})`}
+                <div key={i} style={s.borderL}>
+                  <span style={s.textSm}>
+                    {l.language} {l.proficiency && `(${l.proficiency})`}
+                  </span>
                 </div>
               ))}
             </section>
@@ -402,29 +414,29 @@ const ModernTemplate = ({
         <div style={h.name}>{data.personal_info?.full_name}</div>
         <div style={h.headerRow}>
           {data.personal_info?.email && (
-            <>
+            <span style={h.contactItem}>
               <Mail size={14} /> {data.personal_info.email}
-            </>
+            </span>
           )}
           {data.personal_info?.phone && (
-            <>
+            <span style={h.contactItem}>
               <Phone size={14} /> {data.personal_info.phone}
-            </>
+            </span>
           )}
           {data.personal_info?.location && (
-            <>
+            <span style={h.contactItem}>
               <MapPin size={14} /> {data.personal_info.location}
-            </>
+            </span>
           )}
           {data.personal_info?.linkedin && (
-            <>
+            <span style={h.contactItem}>
               <Linkedin size={14} /> {data.personal_info.linkedin}
-            </>
+            </span>
           )}
           {data.personal_info?.website && (
-            <>
+            <span style={h.contactItem}>
               <Globe size={14} /> {data.personal_info.website}
-            </>
+            </span>
           )}
         </div>
       </header>

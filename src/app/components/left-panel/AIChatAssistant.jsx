@@ -71,11 +71,10 @@ export default function AIChatAssistant({ resumeData, setResumeData }) {
 
           <div
             key={i}
-            className={`text-sm p-2 rounded ${
-              c.role === "user"
+            className={`text-sm p-2 rounded ${c.role === "user"
                 ? "bg-blue-100 text-right"
                 : "bg-gray-100"
-            }`}
+              }`}
           >
             {c.text}
           </div>
@@ -100,9 +99,7 @@ export default function AIChatAssistant({ resumeData, setResumeData }) {
         >
           Send
         </button>
-
       </div>
-
     </div>
   )
 }

@@ -1,61 +1,30 @@
-'use client'
+"use client";
 
-import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import toast from 'react-hot-toast'
-import LeftPanel from '@/app/components/left-panel/LeftPanel'
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
+import LeftPanel from "@/app/components/left-panel/LeftPanel";
 
-import {
-  ArrowLeftIcon,
-  User,
-  FileText,
-  Briefcase,
-  GraduationCap,
-  FolderIcon,
-  Sparkles,
-  Award,
-  Languages,
-  Users,
-  LayoutGrid,
-  Share2Icon,
-  DownloadIcon,
-  EyeIcon,
-  EyeOffIcon,
-  LayoutTemplate,
-  Shapes,
-  Crown,
-  UploadCloud,
-  Wrench,
-  Folder,
-  TextCursorInput,
-  Type,
-  BotMessageSquare,
-  SearchCheck,
-  // Sparkles,
-} from 'lucide-react'
+import { ArrowLeftIcon, User, FileText, Briefcase, GraduationCap, FolderIcon, Sparkles, Award, Languages, Users, LayoutGrid, Share2Icon, DownloadIcon, EyeIcon, EyeOffIcon, LayoutTemplate, Shapes, Crown, UploadCloud, Wrench, Folder, TextCursorInput, Type, BotMessageSquare, SearchCheck, Grid, } from "lucide-react";
 
-import AIChatAssistant from "@/app/components/left-panel/AIChatAssistant"
-
+import AIChatAssistant from "@/app/components/left-panel/AIChatAssistant";
 import ATSChecker from "@/app/components/left-panel/ATSChecker";
-// import AIChatAssistant from "@/app/components/AIChatAssistant";
-
-import TemplateSelector from '@/app/components/left-panel/TemplateSelector'
-import ResumePreview from '@/app/components/ResumePreview'
-import ColorPicker from '@/app/components/left-panel/ColorPicker'
-import TypographySettings from '@/app/components/left-panel/TypographySettings' // Import the new component
+import TemplateSelector from "@/app/components/left-panel/TemplateSelector";
+import ResumePreview from "@/app/components/ResumePreview";
+import ColorPicker from "@/app/components/left-panel/ColorPicker";
+import TypographySettings from "@/app/components/left-panel/TypographySettings"; // Import the new component
 
 const ResumeBuilder = () => {
-  const { resumeId } = useParams()
-  const { data: session, status } = useSession()
+  const { resumeId } = useParams();
+  const { data: session, status } = useSession();
   const [active, setActive] = useState("templates");
 
-
   const [resumeData, setResumeData] = useState({
-    title: '',
+    title: "",
     personal_info: {},
-    professional_summary: '',
+    professional_summary: "",
     experience: [],
     education: [],
     projects: [],
@@ -64,23 +33,20 @@ const ResumeBuilder = () => {
     achievements: [],
     languages: [],
     custom_sections: [],
-    template: 'classic',
-    accent_color: '#3B82F6',
+    template: "classic",
+    accent_color: "#3B82F6",
     public: false,
-  })
+  });
 
-  const [activeSectionIndex, setActiveSectionIndex] = useState(0)
-  const [removeBackground, setRemoveBackground] = useState(false)
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [removeBackground, setRemoveBackground] = useState(false);
 
   // Add typography state
-  const [showTypographySettings, setShowTypographySettings] = useState(false)
-  const [selectedTypographySection, setSelectedTypographySection] = useState("header")
+  const [showTypographySettings, setShowTypographySettings] = useState(false);
+  const [selectedTypographySection, setSelectedTypographySection] =
+    useState("header");
   const [sectionTypographies, setSectionTypographies] = useState({
-    header: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
+    header: { fontFamily: "Inter, sans-serif", fontSize: 14, lineHeight: 1.5 },
     professional_summary: {
       fontFamily: "Inter, sans-serif",
       fontSize: 14,
@@ -121,21 +87,21 @@ const ResumeBuilder = () => {
       fontSize: 14,
       lineHeight: 1.5,
     },
-  })
+  });
 
   const sections = [
-    { id: 'personal', name: 'Personal Info', icon: User },
-    { id: 'summary', name: 'Summary', icon: FileText },
-    { id: 'experience', name: 'Experience', icon: Briefcase },
-    { id: 'education', name: 'Education', icon: GraduationCap },
-    { id: 'projects', name: 'Projects', icon: FolderIcon },
-    { id: 'skills', name: 'Skills', icon: Sparkles },
-    { id: 'participations', name: 'Participations', icon: Users },
-    { id: 'achievements', name: 'Achievements', icon: Award },
-    { id: 'languages', name: 'Languages', icon: Languages },
-    { id: 'custom', name: 'Custom Sections', icon: LayoutGrid },
-  ]
-  const activeSection = sections[activeSectionIndex]
+    { id: "personal", name: "Personal Info", icon: User },
+    { id: "summary", name: "Summary", icon: FileText },
+    { id: "experience", name: "Experience", icon: Briefcase },
+    { id: "education", name: "Education", icon: GraduationCap },
+    { id: "projects", name: "Projects", icon: FolderIcon },
+    { id: "skills", name: "Skills", icon: Sparkles },
+    { id: "participations", name: "Participations", icon: Users },
+    { id: "achievements", name: "Achievements", icon: Award },
+    { id: "languages", name: "Languages", icon: Languages },
+    { id: "custom", name: "Custom Sections", icon: LayoutGrid },
+  ];
+  const activeSection = sections[activeSectionIndex];
 
   /* ---------------- TYPOGRAPHY FUNCTIONS ---------------- */
   const updateTypography = (key, value) => {
@@ -148,68 +114,65 @@ const ResumeBuilder = () => {
     }));
   };
 
-
-
   /* ---------------- LOAD RESUME ---------------- */
   useEffect(() => {
-    if (!resumeId || status !== 'authenticated') return
+    if (!resumeId || status !== "authenticated") return;
 
     const loadResume = async () => {
       try {
-        const res = await fetch(`/api/resumes/${resumeId}`)
-        const data = await res.json()
+        const res = await fetch(`/api/resumes/${resumeId}`);
+        const data = await res.json();
 
-        if (!res.ok) throw new Error(data.message)
-        setResumeData(data.resume)
+        if (!res.ok) throw new Error(data.message);
+        setResumeData(data.resume);
 
         // Load saved typography if exists
         if (data.resume.typography) {
-          setSectionTypographies(data.resume.typography)
+          setSectionTypographies(data.resume.typography);
         }
 
-        document.title = data.resume.title
+        document.title = data.resume.title;
       } catch (err) {
-        toast.error(err.message)
+        toast.error(err.message);
       }
-    }
+    };
 
-    loadResume()
-  }, [resumeId, status])
+    loadResume();
+  }, [resumeId, status]);
 
   /* ---------------- SAVE RESUME ---------------- */
   const saveResume = async () => {
-    const cloned = structuredClone(resumeData)
-    const formData = new FormData()
+    const cloned = structuredClone(resumeData);
+    const formData = new FormData();
 
-    formData.append("resumeId", resumeId)
+    formData.append("resumeId", resumeId);
 
     if (typeof cloned.personal_info?.image === "object") {
-      delete cloned.personal_info.image
+      delete cloned.personal_info.image;
     }
 
     // Add typography to saved data
-    cloned.typography = sectionTypographies
+    cloned.typography = sectionTypographies;
 
-    formData.append("resumeData", JSON.stringify(cloned))
+    formData.append("resumeData", JSON.stringify(cloned));
 
     if (removeBackground) {
-      formData.append("removeBackground", "yes")
+      formData.append("removeBackground", "yes");
     }
 
     if (typeof resumeData.personal_info?.image === "object") {
-      formData.append("image", resumeData.personal_info.image)
+      formData.append("image", resumeData.personal_info.image);
     }
 
     const res = await fetch(`/api/resumes/${resumeId}`, {
       method: "PUT",
       body: formData,
-    })
+    });
 
     if (!res.ok) {
-      throw new Error("Failed to save resume")
+      throw new Error("Failed to save resume");
     }
-  }
-
+  };
 
   /* ---------------- PUBLIC / PRIVATE ---------------- */
   const togglePublic = async () => {
@@ -220,63 +183,60 @@ const ResumeBuilder = () => {
         body: JSON.stringify({
           public: !resumeData.public,
         }),
-      })
+      });
 
-      if (!res.ok) throw new Error()
+      if (!res.ok) throw new Error();
 
-      setResumeData(prev => ({
+      setResumeData((prev) => ({
         ...prev,
         public: !prev.public,
-      }))
+      }));
 
-      toast.success("Visibility updated")
+      toast.success("Visibility updated");
     } catch {
-      toast.error("Failed to update visibility")
+      toast.error("Failed to update visibility");
     }
-  }
+  };
 
   /* ---------------- SHARE & DOWNLOAD ---------------- */
   const handleShare = () => {
-    const url = `${window.location.origin}/view/${resumeId}`
-    navigator.share
-      ? navigator.share({ url, text: 'My resume' })
-      : alert(url)
-  }
-
-  // const handleDownload = () => window.print()
+    const url = `${window.location.origin}/view/${resumeId}`;
+    navigator.share ? navigator.share({ url, text: "My resume" }) : alert(url);
+  };
 
   const handleDownload = async () => {
     try {
-      const resumeElement = document.getElementById('resume-preview'); // add id to your ResumePreview
+      const resumeElement = document.getElementById("resume-preview"); // add id to your ResumePreview
       const html = resumeElement.outerHTML;
 
-      const response = await fetch('/api/resumes/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html: document.getElementById('resume-preview').outerHTML }),
+      const response = await fetch("/api/resumes/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          html: document.getElementById("resume-preview").outerHTML,
+        }),
       });
 
-
-      if (!response.ok) throw new Error('Failed to generate PDF');
+      if (!response.ok) throw new Error("Failed to generate PDF");
 
       const blob = await response.blob();
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = 'resume.pdf';
+      link.download = "resume.pdf";
       link.click();
     } catch (err) {
       toast.error(err.message);
     }
   };
-// const resumeId = params.id;
+  // const resumeId = params.id;
   const menuItems = [
     { id: "text", label: "Input", icon: TextCursorInput },
     { id: "templates", label: "Templates", icon: LayoutTemplate },
     { id: "typography", label: "Typography", icon: Type },
     { id: "ai", label: "AI", icon: BotMessageSquare },
     { id: "ats", label: "ATS", icon: SearchCheck },
-    { id: "projects", label: "Projects", icon: Folder },
-    { id: "tools", label: "Tools", icon: Wrench },
+    // { id: "projects", label: "Projects", icon: Folder },
+    // { id: "tools", label: "Tools", icon: Wrench },
     // { id: "apps", label: "Apps", icon: Grid },
     // { id: "magic", label: "Magic Media", icon: Sparkles },
   ];
@@ -305,12 +265,12 @@ const ResumeBuilder = () => {
           />
         );
 
-           case "ats":
-      return (
-        <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-max p-6">
-          <ATSChecker resumeId={resumeId} />
-        </div>
-      );
+      case "ats":
+        return (
+          <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-max p-6">
+            <ATSChecker resumeId={resumeId} />
+          </div>
+        );
 
       case "templates":
         return (
@@ -319,14 +279,14 @@ const ResumeBuilder = () => {
               panel={true}
               selectedTemplate={resumeData.template}
               onChange={(template) =>
-                setResumeData(prev => ({
+                setResumeData((prev) => ({
                   ...prev,
-                  template
+                  template,
                 }))
               }
             />
           </div>
-        )
+        );
       case "typography":
         return (
           <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-max p-6 flex flex-col gap-4">
@@ -340,36 +300,36 @@ const ResumeBuilder = () => {
             <ColorPicker
               selectedColor={resumeData.accent_color}
               onChange={(color) =>
-                setResumeData(prev => ({
+                setResumeData((prev) => ({
                   ...prev,
-                  accent_color: color
+                  accent_color: color,
                 }))
               }
             />
           </div>
         );
 
-            case "text":
-      return (
-        <LeftPanel
-          resumeData={resumeData}
-          setResumeData={setResumeData}
-          activeSection={activeSection}
-          activeSectionIndex={activeSectionIndex}
-          setActiveSectionIndex={setActiveSectionIndex}
-          sections={sections}
-        />
-      )
+      case "text":
+        return (
+          <LeftPanel
+            resumeData={resumeData}
+            setResumeData={setResumeData}
+            activeSection={activeSection}
+            activeSectionIndex={activeSectionIndex}
+            setActiveSectionIndex={setActiveSectionIndex}
+            sections={sections}
+          />
+        );
 
-           case "ai":
-      return (
-        <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-[55%] p-6">
-        <AIChatAssistant
-          resumeData={resumeData}
-          setResumeData={setResumeData}
-        />
-      </div>
-      )
+      case "ai":
+        return (
+          <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-[55%] p-6">
+            <AIChatAssistant
+              resumeData={resumeData}
+              setResumeData={setResumeData}
+            />
+          </div>
+        );
 
       default:
         return (
@@ -380,10 +340,9 @@ const ResumeBuilder = () => {
     }
   };
 
-
   /* ---------------- AUTH GUARD ---------------- */
-  if (status === 'loading') return null
-  if (!session) return null
+  if (status === "loading") return null;
+  if (!session) return null;
 
   return (
     <div>
@@ -408,15 +367,20 @@ const ResumeBuilder = () => {
                 key={item.id}
                 onClick={() => setActive(item.id)}
                 className={`flex flex-col items-center gap-1 py-2 w-full transition-all duration-200 hover:scale-110 rounded-lg
-                ${isActive
+                ${
+                  isActive
                     ? "text-white bg-green-500 scale-115"
                     : "hover:bg-green-500 hover:text-white scale-110 transition-all duration-200"
-                  }
+                }
               `}
               >
                 <Icon
                   size={22}
-                  className={isActive ? "text-white scale-110 transition-all duration-200" : ""}
+                  className={
+                    isActive
+                      ? "text-white scale-110 transition-all duration-200"
+                      : ""
+                  }
                 />
                 <span className="text-xs">{item.label}</span>
               </button>
@@ -425,13 +389,11 @@ const ResumeBuilder = () => {
         </div>
       </aside>
 
-
       <div className="max-w-7xl mx-auto px-4 pb-8">
-        <div className="grid lg:grid-cols-12 gap-8">
+        <div className="grid lg:ml-0 ml-10 lg:grid-cols-12 gap-8">
           {/* LEFT PANEL */}
 
           {renderLeftContent()}
-
 
           {/* RIGHT PANEL */}
           <div className="lg:col-span-7 max-lg:mt-6">
@@ -454,7 +416,7 @@ const ResumeBuilder = () => {
                   ) : (
                     <EyeOffIcon className="size-4" />
                   )}
-                  {resumeData.public ? 'Public' : 'Private'}
+                  {resumeData.public ? "Public" : "Private"}
                 </button>
                 <button
                   onClick={handleDownload}
@@ -476,7 +438,7 @@ const ResumeBuilder = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ResumeBuilder
+export default ResumeBuilder;

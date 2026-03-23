@@ -7,6 +7,8 @@ const TemplateSelector = ({ selectedTemplate, onChange, panel = false }) => {
 
     const templates = [
         { id: "classic", name: "Classic", preview: "A clean, traditional resume format with clear sections and professional typography" },
+        { id: "professional", name: "Professional", preview: "A highly structured, single-column corporate resume with clean dividers" },
+        { id: "creative", name: "Creative", preview: "A vibrant two-column design with a colorful header block and modern layout" },
         { id: "modern", name: "Modern", preview: "Sleek design with strategic use of color and modern font choices" },
         { id: "minimal-image", name: "Minimal Image", preview: "Minimal design with a single image and clean typography" },
         { id: "minimal", name: "Minimal", preview: "Ultra-clean design that puts your content front and center" },
