@@ -28,7 +28,14 @@ const TypographySettings = ({
   onSelectSection,
 }) => {
 
-  const values = sectionTypographies[selectedSection] || DEFAULTS
+  const baseSettings = sectionTypographies['header'] || DEFAULTS;
+  const currentSettings = sectionTypographies[selectedSection] || {};
+
+  const values = {
+    fontFamily: currentSettings.fontFamily || baseSettings.fontFamily,
+    fontSize: currentSettings.fontSize || baseSettings.fontSize,
+    lineHeight: currentSettings.lineHeight || baseSettings.lineHeight,
+  };
 
   return (
     <div className="lg:col-span-5 bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-5">
@@ -51,10 +58,9 @@ const TypographySettings = ({
               key={s.id}
               onClick={() => onSelectSection(s.id)}
               className={`text-xs px-2.5 py-1 rounded-full border transition
-                ${
-                  selectedSection === s.id
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                ${selectedSection === s.id
+                  ? 'bg-green-500 text-white border-green-600'
+                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                 }`}
             >
               {s.label}
@@ -75,7 +81,7 @@ const TypographySettings = ({
             onUpdateTypography('fontFamily', e.target.value)
           }
           className="w-full rounded-md border px-2 py-2 text-xs
-          focus:ring-2 focus:ring-blue-400 outline-none"
+          focus:ring-2 focus:ring-green-400 outline-none"
         >
           <option value="Inter, sans-serif">Inter</option>
           <option value="Arial, sans-serif">Arial</option>
@@ -107,7 +113,7 @@ const TypographySettings = ({
           onChange={(e) =>
             onUpdateTypography('fontSize', Number(e.target.value))
           }
-          className="w-full accent-blue-500"
+          className="w-full accent-green-400"
         />
       </div>
 
@@ -132,7 +138,7 @@ const TypographySettings = ({
           onChange={(e) =>
             onUpdateTypography('lineHeight', Number(e.target.value))
           }
-          className="w-full accent-blue-500"
+          className="w-full accent-green-400"
         />
       </div>
 
@@ -150,11 +156,13 @@ const TypographySettings = ({
 
       {/* Reset */}
       <button
-        onClick={() =>
-          Object.entries(DEFAULTS).forEach(([k, v]) =>
-            onUpdateTypography(k, v)
-          )
-        }
+        onClick={() => {
+          if (selectedSection === 'header') {
+            Object.entries(DEFAULTS).forEach(([k, v]) => onUpdateTypography(k, v));
+          } else {
+            Object.keys(DEFAULTS).forEach(k => onUpdateTypography(k, null));
+          }
+        }}
         className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition"
       >
         <RotateCcw size={12} />

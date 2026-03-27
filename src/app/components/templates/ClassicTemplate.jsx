@@ -209,7 +209,7 @@ const ArchitectTemplate = ({
 
     // Map key to typography key (skills are combined under "skills")
     const typographyKey =
-      key === "technical_skills" || key === "soft_skills" ? "skills" : key;
+      key === "technical_skills" || key === "soft_skills" ? "skills" : (key === "about" ? "professional_summary" : key);
     const s = styles(typographyKey);
 
     // Helper to wrap with SortableItem

@@ -15,7 +15,7 @@ import TemplateSelector from "@/app/components/left-panel/TemplateSelector";
 import ResumePreview from "@/app/components/ResumePreview";
 import ColorPicker from "@/app/components/left-panel/ColorPicker";
 import TypographySettings from "@/app/components/left-panel/TypographySettings"; // Import the new component
-
+import Projects from "@/app/components/left-panel/Projects";
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const { data: session, status } = useSession();
@@ -46,48 +46,25 @@ const ResumeBuilder = () => {
   const [selectedTypographySection, setSelectedTypographySection] =
     useState("header");
   const [sectionTypographies, setSectionTypographies] = useState({
-    header: { fontFamily: "Inter, sans-serif", fontSize: 14, lineHeight: 1.5 },
-    professional_summary: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    experience: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    projects: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    education: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    skills: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    participations: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    achievements: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
-    languages: {
-      fontFamily: "Inter, sans-serif",
-      fontSize: 14,
-      lineHeight: 1.5,
-    },
+    header: { fontFamily: "Inter, sans-serif", fontSize: 14, lineHeight: 1.5 }
   });
+
+  const updateTypography = (key, value) => {
+    setSectionTypographies((prev) => {
+      // If value is null, we are clearing the override for inheritance
+      const currentSection = prev[selectedTypographySection] || {};
+      const newSection = { ...currentSection, [key]: value };
+      
+      if (value === null) {
+        delete newSection[key];
+      }
+
+      return {
+        ...prev,
+        [selectedTypographySection]: newSection,
+      };
+    });
+  };
 
   const sections = [
     { id: "personal", name: "Personal Info", icon: User },
@@ -104,17 +81,7 @@ const ResumeBuilder = () => {
   const activeSection = sections[activeSectionIndex];
 
   /* ---------------- TYPOGRAPHY FUNCTIONS ---------------- */
-  const updateTypography = (key, value) => {
-    setSectionTypographies((prev) => ({
-      ...prev,
-      [selectedTypographySection]: {
-        ...prev[selectedTypographySection],
-        [key]: value,
-      },
-    }));
-  };
 
-  /* ---------------- LOAD RESUME ---------------- */
   useEffect(() => {
     if (!resumeId || status !== "authenticated") return;
 
@@ -206,15 +173,54 @@ const ResumeBuilder = () => {
 
   const handleDownload = async () => {
     try {
-      const resumeElement = document.getElementById("resume-preview"); // add id to your ResumePreview
-      const html = resumeElement.outerHTML;
+      const resumeElement = document.getElementById("resume-preview");
+      const templateHtml = resumeElement.outerHTML;
+
+      // Ensure custom Google Fonts are loaded by Puppeteer, plus standard print CSS
+      const htmlPayload = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+              @page { size: A4; }
+              body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              #resume-preview {
+                width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              .break-inside-avoid, section, .experience-item, .education-item, .project-item {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                display: block;
+              }
+            </style>
+          </head>
+          <body>
+            ${templateHtml}
+          </body>
+        </html>
+      `;
 
       const response = await fetch("/api/resumes/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          html: document.getElementById("resume-preview").outerHTML,
-        }),
+        body: JSON.stringify({ html: htmlPayload }),
       });
 
       if (!response.ok) throw new Error("Failed to generate PDF");
@@ -235,7 +241,7 @@ const ResumeBuilder = () => {
     { id: "typography", label: "Typography", icon: Type },
     { id: "ai", label: "AI", icon: BotMessageSquare },
     { id: "ats", label: "ATS", icon: SearchCheck },
-    // { id: "projects", label: "Projects", icon: Folder },
+    { id: "projects", label: "Projects", icon: Folder },
     // { id: "tools", label: "Tools", icon: Wrench },
     // { id: "apps", label: "Apps", icon: Grid },
     // { id: "magic", label: "Magic Media", icon: Sparkles },
@@ -331,6 +337,16 @@ const ResumeBuilder = () => {
           </div>
         );
 
+      case "projects":
+        return (
+          <div className="lg:col-span-5 bg-white rounded-lg shadow-sm h-[55%] p-6">
+            <Projects
+              resumeData={resumeData}
+              setResumeData={setResumeData}
+            />
+          </div>
+        );
+
       default:
         return (
           <div className="lg:col-span-5 bg-white rounded-lg shadow-sm  p-6 flex items-center justify-center h-[55%] text-gray-400">
@@ -367,11 +383,10 @@ const ResumeBuilder = () => {
                 key={item.id}
                 onClick={() => setActive(item.id)}
                 className={`flex flex-col items-center gap-1 py-2 w-full transition-all duration-200 hover:scale-110 rounded-lg
-                ${
-                  isActive
+                ${isActive
                     ? "text-white bg-green-500 scale-115"
                     : "hover:bg-green-500 hover:text-white scale-110 transition-all duration-200"
-                }
+                  }
               `}
               >
                 <Icon

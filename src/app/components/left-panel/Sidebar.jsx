@@ -18,9 +18,9 @@ const menuItems = [
   { id: "elements", label: "Elements", icon: Shapes },
   { id: "templates", label: "Templates", icon: LayoutTemplate },
   { id: "brand", label: "Brand", icon: Crown },
-  { id: "uploads", label: "Uploads", icon: UploadCloud },
-  { id: "tools", label: "Tools", icon: Wrench },
-  { id: "projects", label: "Projects", icon: Folder },
+  // { id: "uploads", label: "Uploads", icon: UploadCloud },
+  // { id: "tools", label: "Tools", icon: Wrench },
+  // { id: "projects", label: "Projects", icon: Folder },
   // { id: "apps", label: "Apps", icon: Grid },
   // { id: "magic", label: "Magic Media", icon: Sparkles },
 ];
