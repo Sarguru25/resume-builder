@@ -169,6 +169,7 @@ const CreativeTemplate = ({
         fontSize: baseFontSize * 0.9,
         color: "#475569",
         lineHeight: 1.6
+        
       },
       skillPill: {
         display: "inline-block",

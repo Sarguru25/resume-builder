@@ -6,6 +6,7 @@ import {
   Linkedin,
   Globe,
   GripVertical,
+  TextAlignJustify,
 } from "lucide-react";
 
 /* =========================
@@ -131,6 +132,7 @@ const ArchitectTemplate = ({
         background: "#fff",
         color: "#1f2937",
         fontFamily: t.fontFamily,
+        textAlign: "justify",
       },
       // Two‑column layout
       columns: {
